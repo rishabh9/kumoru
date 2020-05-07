@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.github.rishabh9.kumoru.TestMainVerticle" tests="1" skipped="0" failures="0" errors="0" timestamp="2020-05-07T07:42:35" hostname="bronx" time="0.417">
+  <properties/>
+  <testcase name="verticle_deployed(Vertx, VertxTestContext)" classname="com.github.rishabh9.kumoru.TestMainVerticle" time="0.417"/>
+  <system-out><![CDATA[HTTP server started on port 8888
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

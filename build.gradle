@@ -1,0 +1,155 @@
+plugins {
+  id 'java'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '5.2.0'
+  id 'checkstyle'
+  id 'maven-publish'
+  id 'signing'
+  id 'io.freefair.lombok' version '5.0.1'
+  id 'com.limark.gitflowsemver' version '0.3.1'
+  id 'com.diffplug.gradle.spotless' version '3.29.0'
+  id 'com.google.cloud.tools.jib' version '2.2.0'
+}
+
+group = 'com.github.rishabh9'
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  vertxVersion = '3.9.0'
+  junitJupiterEngineVersion = '5.4.0'
+}
+
+application {
+  mainClassName = 'io.vertx.core.Launcher'
+}
+
+java {
+  withJavadocJar()
+  withSourcesJar()
+
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
+
+def mainVerticleName = 'com.github.rishabh9.kumoru.MainVerticle'
+def watchForChange = 'src/**/*'
+def doOnChange = './gradlew classes'
+
+dependencies {
+  implementation "io.vertx:vertx-web-client:$vertxVersion"
+  implementation "io.vertx:vertx-web:$vertxVersion"
+  implementation "io.vertx:vertx-auth-htdigest:$vertxVersion"
+
+  testImplementation "io.vertx:vertx-junit5:$vertxVersion"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterEngineVersion"
+}
+
+
+shadowJar {
+  classifier = 'fat'
+  manifest {
+    attributes 'Main-Verticle': mainVerticleName
+  }
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
+}
+
+test {
+  useJUnitPlatform()
+  testLogging {
+    events 'PASSED', 'FAILED', 'SKIPPED'
+  }
+}
+
+run {
+  args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+}
+
+jib {
+  from {
+    image = 'azul/zulu-openjdk-alpine:11-jre'
+  }
+  to {
+    image = 'rishabh9/kumoru'
+    project.afterEvaluate {
+      tags = [version]
+    }
+  }
+  container {
+    jvmFlags = ['-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector']
+    format = 'OCI'
+  }
+}
+
+publishing {
+
+  repositories {
+    maven {
+      def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+      def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+      url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+      credentials {
+        username ossNexusUsername
+        password ossNexusPassword
+      }
+    }
+  }
+
+  publications {
+    mavenJava(MavenPublication) {
+      artifactId = 'kumoru'
+
+      from components.java
+
+      pom {
+        name = 'kumoru'
+        description = 'A minimal Nexus repository to practice Vert.x'
+        url = 'https://github.com/rishabh9/kumoru'
+        developers {
+          developer {
+            id = 'rishabh'
+            name = 'Rishabh Joshi'
+            email = 'rishabh9@gmail.com'
+          }
+        }
+        licenses {
+          license {
+            name = 'The Apache License, Version 2.0'
+            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+        scm {
+          connection = 'scm:git:ssh://git@github.com:rishabh9/kumoru.git'
+          developerConnection = 'scm:git:ssh://git@github.com:rishabh9/kumoru.git'
+          url = 'https://github.com/rishabh9/kumoru'
+        }
+      }
+    }
+  }
+}
+
+signing {
+  sign publishing.publications.mavenJava
+}
+
+javadoc {
+  if (JavaVersion.current().isJava9Compatible()) {
+    options.addBooleanOption('html5', true)
+  }
+}
+
+// Nexus still does not support Gradle metadata, so disable
+tasks.withType(GenerateModuleMetadata) {
+  enabled = false
+}
+
+spotless {
+  java {
+    googleJavaFormat('1.7')
+  }
+}
