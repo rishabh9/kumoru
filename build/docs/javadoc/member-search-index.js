@@ -1,1 +1,0 @@
-memberSearchIndex = [{"p":"com.github.rishabh9.kumoru","c":"MainVerticle","l":"MainVerticle()","url":"%3Cinit%3E()"},{"p":"com.github.rishabh9.kumoru","c":"MainVerticle","l":"start(Future<Void>)","url":"start(io.vertx.core.Future)"}]
