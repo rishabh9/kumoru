@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="10">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--      <JsonLayout complete="true" compact="false" eventEol="true" includeStacktrace="true"-->
+            <!--        objectMessageAsJsonObject="true"/>-->
+            <PatternLayout>
+                <pattern>%style{%d{yyyy-MM-dd HH:mm:ss,SSS}{IST}}{Magenta} %style{[%t]}{bright,blue} %highlight{%-5level} %style{%logger{1.}}{Cyan} - %msg%n
+                </pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info" includeLocation="false">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Logger name="com.github.rishabh9.kumoru" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="io.vertx" level="warn" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>
