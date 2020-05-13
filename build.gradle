@@ -22,6 +22,7 @@ ext {
   log4j2Version = '2.13.2'
   disruptorVersion = '3.4.2'
   tikaVersion = '1.24.1'
+  // daggerVersion = '2.27'
 }
 
 application {
@@ -45,6 +46,9 @@ dependencies {
   implementation "io.vertx:vertx-web-client:$vertxVersion"
 
   implementation "org.apache.tika:tika-core:$tikaVersion"
+
+  // implementation "com.google.dagger:dagger:$daggerVersion"
+  // annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
 
   implementation "org.apache.logging.log4j:log4j-api:$log4j2Version"
   implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
@@ -160,3 +164,19 @@ spotless {
     googleJavaFormat('1.7')
   }
 }
+
+task createExtraFilesIndex {
+  // destination directory for the index file
+  def versionFileDir = "$buildDir/resources/main"
+  // index filename
+  def versionFileName = "version.properties"
+  doLast {
+    file(versionFileDir).mkdirs()
+    file("$versionFileDir/$versionFileName").delete()
+    // Groovy concise syntax for writing into file; maybe you want to delete this file first.
+    file("$versionFileDir/$versionFileName") << "version=$version"
+  }
+}
+
+// make  processResources depends on createExtraFilesIndex task
+processResources.dependsOn createExtraFilesIndex

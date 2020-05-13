@@ -1,31 +1,54 @@
 package com.github.rishabh9.kumoru;
 
+import com.github.rishabh9.kumoru.handlers.FileNotFoundErrorHandler;
+import com.github.rishabh9.kumoru.handlers.FileSystemHandler;
+import com.github.rishabh9.kumoru.handlers.IndexSearchHandler;
+import com.github.rishabh9.kumoru.handlers.JCenterMirror;
+import com.github.rishabh9.kumoru.handlers.JitPackMirror;
+import com.github.rishabh9.kumoru.handlers.MavenMirror;
+import com.github.rishabh9.kumoru.handlers.RequestValidator;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.LoggerFormat;
+import io.vertx.ext.web.handler.LoggerHandler;
 import lombok.extern.log4j.Log4j2;
-import org.apache.tika.Tika;
 
 @Log4j2
 public class MainVerticle extends AbstractVerticle {
 
   private static final int PORT = 8888;
-  private static final int NOT_FOUND = 404;
-  private static final String ROOT_DIR = "/tmp/vrt";
 
   @Override
-  public void start(final Promise<Void> startFuture) throws Exception {
+  public void start(final Promise<Void> startFuture) {
+
+    // All handlers
+    final RequestValidator requestValidator = new RequestValidator();
+    final FileSystemHandler fileService = new FileSystemHandler(vertx);
+    final MavenMirror mavenMirror = new MavenMirror(vertx);
+    final JCenterMirror jcenterMirror = new JCenterMirror(vertx);
+    final JitPackMirror jitPackMirror = new JitPackMirror(vertx);
+    final FileNotFoundErrorHandler fileNotFoundErrorHandler = new FileNotFoundErrorHandler(vertx);
+    final IndexSearchHandler searchHandler = new IndexSearchHandler(vertx);
+
+    final Router router = Router.router(vertx);
+    // for all routes do
+    router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT)).handler(requestValidator);
+    // for HEAD method do
+    router.head().handler(searchHandler).handler(fileNotFoundErrorHandler);
+    // for GET method do
+    router
+        .get()
+        .handler(fileService)
+        .handler(mavenMirror)
+        .handler(jcenterMirror)
+        .handler(jitPackMirror)
+        .handler(fileNotFoundErrorHandler);
+
     // Logging network server activity
-    final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
-    final HttpServer httpServer = vertx.createHttpServer(options);
-    final FileSystem fileSystem = vertx.fileSystem();
-
-    httpServer.requestHandler(req -> handleRequest(fileSystem, req));
-
+    final HttpServer httpServer = vertx.createHttpServer();
+    httpServer.requestHandler(router);
     httpServer.listen(
         PORT,
         asyncResult -> {
@@ -36,30 +59,5 @@ public class MainVerticle extends AbstractVerticle {
             startFuture.fail(asyncResult.cause());
           }
         });
-  }
-
-  private void handleRequest(final FileSystem fileSystem, final HttpServerRequest req) {
-    final String path = req.path();
-    final String method = req.rawMethod();
-    log.info("Requesting: {}: {}", method, path);
-    final String absolutePath = ROOT_DIR + path;
-    fileSystem.exists(
-        absolutePath,
-        asyncResult -> {
-          if (null != asyncResult.result() && asyncResult.result()) {
-            final String filename = path.substring(path.lastIndexOf("/") + 1);
-            final String mimeType = new Tika().detect(absolutePath);
-            log.info("Filename: {}, MimeType: {}", filename, mimeType);
-            req.response()
-                .putHeader(HttpHeaders.CONTENT_TYPE, mimeType)
-                .putHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"")
-                .putHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
-                .sendFile(absolutePath);
-          } else {
-            log.info("File wasn't found: {}", absolutePath);
-            req.response().setStatusCode(NOT_FOUND).setStatusMessage("Resource not found").end();
-          }
-        });
-    log.info("Exiting request handler here...");
   }
 }
