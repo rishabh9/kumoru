@@ -165,10 +165,10 @@ spotless {
   }
 }
 
-task createExtraFilesIndex {
-  // destination directory for the index file
+task createVersionFile {
+  // destination directory for the version file
   def versionFileDir = "$buildDir/resources/main"
-  // index filename
+  // version filename
   def versionFileName = "version.properties"
   doLast {
     file(versionFileDir).mkdirs()
@@ -178,5 +178,5 @@ task createExtraFilesIndex {
   }
 }
 
-// make  processResources depends on createExtraFilesIndex task
-processResources.dependsOn createExtraFilesIndex
+// make processResources depends on createVersionFile task
+processResources.dependsOn createVersionFile

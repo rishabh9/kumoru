@@ -1,15 +1,17 @@
 package com.github.rishabh9.kumoru;
 
-import com.github.rishabh9.kumoru.handlers.FileNotFoundErrorHandler;
-import com.github.rishabh9.kumoru.handlers.FileSystemHandler;
+import com.github.rishabh9.kumoru.handlers.FinalHandler;
 import com.github.rishabh9.kumoru.handlers.IndexSearchHandler;
-import com.github.rishabh9.kumoru.handlers.JCenterMirror;
-import com.github.rishabh9.kumoru.handlers.JitPackMirror;
-import com.github.rishabh9.kumoru.handlers.MavenMirror;
-import com.github.rishabh9.kumoru.handlers.RequestValidator;
+import com.github.rishabh9.kumoru.handlers.JCenterMirrorHandler;
+import com.github.rishabh9.kumoru.handlers.JitPackMirrorHandler;
+import com.github.rishabh9.kumoru.handlers.LocalResourceHandler;
+import com.github.rishabh9.kumoru.handlers.MavenMirrorHandler;
+import com.github.rishabh9.kumoru.handlers.SendFileHandler;
+import com.github.rishabh9.kumoru.handlers.ValidRequestHandler;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
@@ -24,30 +26,33 @@ public class MainVerticle extends AbstractVerticle {
   public void start(final Promise<Void> startFuture) {
 
     // All handlers
-    final RequestValidator requestValidator = new RequestValidator();
-    final FileSystemHandler fileService = new FileSystemHandler(vertx);
-    final MavenMirror mavenMirror = new MavenMirror(vertx);
-    final JCenterMirror jcenterMirror = new JCenterMirror(vertx);
-    final JitPackMirror jitPackMirror = new JitPackMirror(vertx);
-    final FileNotFoundErrorHandler fileNotFoundErrorHandler = new FileNotFoundErrorHandler(vertx);
-    final IndexSearchHandler searchHandler = new IndexSearchHandler(vertx);
+    final ValidRequestHandler validRequestHandler = new ValidRequestHandler();
+    final LocalResourceHandler localResourceHandler = new LocalResourceHandler(vertx);
+    final MavenMirrorHandler mavenMirror = new MavenMirrorHandler(vertx);
+    final JCenterMirrorHandler jcenterMirror = new JCenterMirrorHandler(vertx);
+    final JitPackMirrorHandler jitPackMirror = new JitPackMirrorHandler(vertx);
+    final FinalHandler finalHandler = new FinalHandler();
+    final IndexSearchHandler searchHandler = new IndexSearchHandler();
+    final SendFileHandler sendFileHandler = new SendFileHandler();
 
     final Router router = Router.router(vertx);
     // for all routes do
-    router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT)).handler(requestValidator);
+    router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT)).handler(validRequestHandler);
     // for HEAD method do
-    router.head().handler(searchHandler).handler(fileNotFoundErrorHandler);
+    router.head().handler(searchHandler).handler(finalHandler);
     // for GET method do
     router
         .get()
-        .handler(fileService)
+        .handler(localResourceHandler)
         .handler(mavenMirror)
         .handler(jcenterMirror)
         .handler(jitPackMirror)
-        .handler(fileNotFoundErrorHandler);
+        .handler(sendFileHandler)
+        .handler(finalHandler);
 
     // Logging network server activity
-    final HttpServer httpServer = vertx.createHttpServer();
+    final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
+    final HttpServer httpServer = vertx.createHttpServer(options);
     httpServer.requestHandler(router);
     httpServer.listen(
         PORT,
