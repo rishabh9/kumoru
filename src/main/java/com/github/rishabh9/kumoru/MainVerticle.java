@@ -12,6 +12,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
@@ -20,10 +21,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MainVerticle extends AbstractVerticle {
 
-  private static final int PORT = 8888;
-
   @Override
   public void start(final Promise<Void> startFuture) {
+
+    // Get all environment variables
+    final int port = getKumoruPort();
+    final boolean enableAccessLog = enableAccessLog();
 
     // All handlers
     final ValidRequestHandler validRequestHandler = new ValidRequestHandler();
@@ -37,7 +40,11 @@ public class MainVerticle extends AbstractVerticle {
 
     final Router router = Router.router(vertx);
     // for all routes do
-    router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT)).handler(validRequestHandler);
+    final Route route = router.route();
+    if (enableAccessLog) {
+      route.handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+    }
+    route.handler(validRequestHandler);
     // for HEAD method do
     router.head().handler(searchHandler).handler(finalHandler);
     // for GET method do
@@ -55,14 +62,38 @@ public class MainVerticle extends AbstractVerticle {
     final HttpServer httpServer = vertx.createHttpServer(options);
     httpServer.requestHandler(router);
     httpServer.listen(
-        PORT,
+        port,
         asyncResult -> {
           if (asyncResult.succeeded()) {
             startFuture.complete();
-            log.info("Kumoru server started on port {}", PORT);
+            log.info("Kumoru server started on port {}", port);
           } else {
             startFuture.fail(asyncResult.cause());
           }
         });
+  }
+
+  private boolean enableAccessLog() {
+    final String flag = System.getenv("KUMORU_ACCESS_LOG");
+    if (null != flag && !flag.isEmpty() && flag.matches("^(true|false)$")) {
+      return Boolean.parseBoolean(flag);
+    }
+    return false;
+  }
+
+  // I see no utility of this facility if deployed as a Docker container.
+  private int getKumoruPort() {
+    final int defaultPort = 8888;
+    final String port = System.getenv("KUMORU_PORT");
+    log.debug("Port configured as {}", port);
+    if (null != port
+        && !port.isEmpty()
+        && port.matches(
+            "^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$")) {
+      return Integer.parseInt(port);
+    } else {
+      log.debug("Setting default port {}", defaultPort);
+      return defaultPort;
+    }
   }
 }

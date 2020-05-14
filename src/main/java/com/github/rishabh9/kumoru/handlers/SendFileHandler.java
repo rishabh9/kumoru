@@ -16,11 +16,11 @@ public class SendFileHandler extends KumoruHandler {
   public void handle(final RoutingContext routingContext) {
     if (resourceFound(routingContext)) {
       final String path = routingContext.normalisedPath();
-      log.info("Sending resource {}", path);
-      final String absolutePath = REPO_DIR + path;
+      log.debug("Sending resource {}", path);
+      final String absolutePath = REPO_ROOT + path;
       final String filename = path.substring(path.lastIndexOf("/") + 1);
       final String mimeType = new Tika().detect(absolutePath);
-      log.info("Filename: {}, MimeType: {}", filename, mimeType);
+      log.debug("Filename: {}, MimeType: {}", filename, mimeType);
       routingContext
           .response()
           .putHeader(HttpHeaders.CONTENT_TYPE, mimeType)

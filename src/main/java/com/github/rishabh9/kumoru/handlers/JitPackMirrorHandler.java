@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 
 public class JitPackMirrorHandler extends AbstractMirrorHandler {
 
-  private static final String RELEASE_URL = "jitpack.io";
+  private static final String RELEASE_URL = "https://jitpack.io";
 
   // Jitpack does not have a separate snapshot repository url.
   // The release URL is valid for both.

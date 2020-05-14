@@ -22,11 +22,14 @@ ext {
   log4j2Version = '2.13.2'
   disruptorVersion = '3.4.2'
   tikaVersion = '1.24.1'
-  // daggerVersion = '2.27'
 }
 
 application {
   mainClassName = 'io.vertx.core.Launcher'
+  applicationDefaultJvmArgs = [
+      '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector',
+      '-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory'
+  ]
 }
 
 java {
@@ -46,9 +49,6 @@ dependencies {
   implementation "io.vertx:vertx-web-client:$vertxVersion"
 
   implementation "org.apache.tika:tika-core:$tikaVersion"
-
-  // implementation "com.google.dagger:dagger:$daggerVersion"
-  // annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
 
   implementation "org.apache.logging.log4j:log4j-api:$log4j2Version"
   implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
@@ -72,6 +72,10 @@ run {
       "--redeploy=$watchForChange",
       "--launcher-class=$mainClassName",
       "--on-redeploy=$doOnChange"
+  ]
+  jvmArgs = [
+      '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector',
+      '-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory'
   ]
 }
 

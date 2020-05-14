@@ -22,13 +22,13 @@ public class LocalResourceHandler extends KumoruHandler {
   public void handle(final RoutingContext routingContext) {
     final FileSystem fileSystem = vertx.fileSystem();
     final String path = routingContext.normalisedPath();
-    final String absolutePath = REPO_DIR + path;
+    final String absolutePath = REPO_ROOT + path;
     fileSystem.exists(
         absolutePath,
         asyncResult -> {
           if (null != asyncResult.result() && asyncResult.result()) {
             log.debug("Found resource {} locally", path);
-            routingContext.data().put(RESOURCE_FOUND_FLAG, true);
+            markResourceFound(routingContext);
           } else {
             log.debug("Resource {} not found locally, moving onto next handler", path);
           }
