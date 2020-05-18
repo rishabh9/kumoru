@@ -6,8 +6,9 @@ import io.vertx.ext.web.RoutingContext;
 abstract class KumoruHandler implements Handler<RoutingContext> {
   protected static final String REPO_ROOT = "/srv/repo";
   protected static final int BAD_REQUEST = 400;
-  protected static final int INTERNAL_ERROR = 500;
   protected static final int NOT_FOUND = 404;
+  protected static final int METHOD_NOT_ALLOWED = 405;
+  protected static final int INTERNAL_ERROR = 500;
   private static final String RESOURCE_FOUND_FLAG = "KRFF";
 
   protected void markResourceFound(final RoutingContext routingContext) {

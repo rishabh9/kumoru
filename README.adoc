@@ -7,15 +7,17 @@ A minimal implementation of Nexus repository to practice Vert.x
 == Features
 .Mirrors
 * [x] Mirror Maven 2.
-* [ ] Mirror JCenter.
-* [ ] Mirror Jitpack.
+* [x] Mirror JCenter.
+* [x] Mirror Jitpack.
+
+.Snapshots
+* [ ] Enable snapshots.
 
 .Publishing artifacts
 * [ ] Publish artifacts to Kumoru. (_Contemplating_)
 
 .HTTP methods supported
 * [x] GET
-* [ ] HEAD
 
 == Pre-Requisites
 
