@@ -5,13 +5,14 @@ image:https://img.shields.io/badge/vert.x-3.9.0-purple.svg[link="https://vertx.i
 A minimal implementation of Nexus repository to practice Vert.x
 
 == Features
-.Mirrors
-* [x] Mirror Maven 2.
-* [x] Mirror JCenter.
-* [x] Mirror Jitpack.
+
+.Mirrors the following repositories:
+* [x] Maven 2.
+* [x] JCenter.
+* [x] Jitpack.
 
 .Snapshots
-* [ ] Enable snapshots.
+* [x] Enable snapshots.
 
 .Publishing artifacts
 * [ ] Publish artifacts to Kumoru. (_Contemplating_)

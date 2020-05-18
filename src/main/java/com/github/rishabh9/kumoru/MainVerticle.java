@@ -1,7 +1,6 @@
 package com.github.rishabh9.kumoru;
 
 import com.github.rishabh9.kumoru.handlers.FinalHandler;
-import com.github.rishabh9.kumoru.handlers.IndexSearchHandler;
 import com.github.rishabh9.kumoru.handlers.JCenterMirrorHandler;
 import com.github.rishabh9.kumoru.handlers.JitPackMirrorHandler;
 import com.github.rishabh9.kumoru.handlers.LocalResourceHandler;
@@ -34,9 +33,8 @@ public class MainVerticle extends AbstractVerticle {
     final MavenMirrorHandler mavenMirror = new MavenMirrorHandler(vertx);
     final JCenterMirrorHandler jcenterMirror = new JCenterMirrorHandler(vertx);
     final JitPackMirrorHandler jitPackMirror = new JitPackMirrorHandler(vertx);
-    final FinalHandler finalHandler = new FinalHandler();
-    final IndexSearchHandler searchHandler = new IndexSearchHandler();
     final SendFileHandler sendFileHandler = new SendFileHandler();
+    final FinalHandler finalHandler = new FinalHandler();
 
     final Router router = Router.router(vertx);
     // for all routes do
@@ -45,8 +43,6 @@ public class MainVerticle extends AbstractVerticle {
       route.handler(LoggerHandler.create(LoggerFormat.DEFAULT));
     }
     route.handler(validRequestHandler);
-    // for HEAD method do
-    router.head().handler(searchHandler).handler(finalHandler);
     // for GET method do
     router
         .get()
@@ -66,7 +62,10 @@ public class MainVerticle extends AbstractVerticle {
         asyncResult -> {
           if (asyncResult.succeeded()) {
             startFuture.complete();
-            log.info("Kumoru server started on port {}", port);
+            log.info(
+                "Kumoru server [v{}] started on port {}",
+                VersionProperties.INSTANCE.getVersion(),
+                port);
           } else {
             startFuture.fail(asyncResult.cause());
           }
