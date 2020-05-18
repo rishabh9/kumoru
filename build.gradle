@@ -1,7 +1,6 @@
 plugins {
   id 'java'
   id 'application'
-  id 'com.github.johnrengelman.shadow' version '5.2.0'
   id 'checkstyle'
   id 'maven-publish'
   id 'signing'
@@ -20,10 +19,17 @@ repositories {
 ext {
   vertxVersion = '3.9.0'
   junitJupiterEngineVersion = '5.4.0'
+  log4j2Version = '2.13.2'
+  disruptorVersion = '3.4.2'
+  tikaVersion = '1.24.1'
 }
 
 application {
   mainClassName = 'io.vertx.core.Launcher'
+  applicationDefaultJvmArgs = [
+      '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector',
+      '-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory'
+  ]
 }
 
 java {
@@ -39,24 +45,18 @@ def watchForChange = 'src/**/*'
 def doOnChange = './gradlew classes'
 
 dependencies {
-  implementation "io.vertx:vertx-web-client:$vertxVersion"
   implementation "io.vertx:vertx-web:$vertxVersion"
-  implementation "io.vertx:vertx-auth-htdigest:$vertxVersion"
+  implementation "io.vertx:vertx-web-client:$vertxVersion"
+
+  implementation "org.apache.tika:tika-core:$tikaVersion"
+
+  implementation "org.apache.logging.log4j:log4j-api:$log4j2Version"
+  implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
+  implementation "com.lmax:disruptor:$disruptorVersion"
 
   testImplementation "io.vertx:vertx-junit5:$vertxVersion"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterEngineVersion"
-}
-
-
-shadowJar {
-  classifier = 'fat'
-  manifest {
-    attributes 'Main-Verticle': mainVerticleName
-  }
-  mergeServiceFiles {
-    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
-  }
 }
 
 test {
@@ -67,7 +67,16 @@ test {
 }
 
 run {
-  args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+  args = [
+      'run', mainVerticleName,
+      "--redeploy=$watchForChange",
+      "--launcher-class=$mainClassName",
+      "--on-redeploy=$doOnChange"
+  ]
+  jvmArgs = [
+      '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector',
+      '-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory'
+  ]
 }
 
 jib {
@@ -76,13 +85,19 @@ jib {
   }
   to {
     image = 'rishabh9/kumoru'
+    credHelper = 'docker-credential-osxkeychain'
     project.afterEvaluate {
-      tags = [version]
+      tags = [version] as Set<String>
     }
   }
   container {
-    jvmFlags = ['-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector']
+    jvmFlags = [
+        '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector',
+        '-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory'
+    ]
     format = 'OCI'
+    mainClass = mainClassName
+    args = ['run', mainVerticleName]
   }
 }
 
@@ -90,8 +105,8 @@ publishing {
 
   repositories {
     maven {
-      def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-      def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+      def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+      def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
       url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
       credentials {
         username ossNexusUsername
@@ -153,3 +168,19 @@ spotless {
     googleJavaFormat('1.7')
   }
 }
+
+task createVersionFile {
+  // destination directory for the version file
+  def versionFileDir = "$buildDir/resources/main"
+  // version filename
+  def versionFileName = "version.properties"
+  doLast {
+    file(versionFileDir).mkdirs()
+    file("$versionFileDir/$versionFileName").delete()
+    // Groovy concise syntax for writing into file; maybe you want to delete this file first.
+    file("$versionFileDir/$versionFileName") << "version=$version"
+  }
+}
+
+// make processResources depends on createVersionFile task
+processResources.dependsOn createVersionFile

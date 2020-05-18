@@ -2,30 +2,53 @@
 
 image:https://img.shields.io/badge/vert.x-3.9.0-purple.svg[link="https://vertx.io"]
 
-This application was generated using http://start.vertx.io
+A minimal implementation of Nexus repository to practice Vert.x
 
-== Building
+== Features
+.Mirrors
+* [x] Mirror Maven 2.
+* [x] Mirror JCenter.
+* [x] Mirror Jitpack.
 
-To launch your tests:
+.Snapshots
+* [ ] Enable snapshots.
+
+.Publishing artifacts
+* [ ] Publish artifacts to Kumoru. (_Contemplating_)
+
+.HTTP methods supported
+* [x] GET
+
+== Pre-Requisites
+
+1. JDK 11
+2. Docker
+
+== Building and Running Locally
+
+To build your application:
 ```
-./gradlew clean test
+./gradlew clean build
 ```
 
-To package your application:
+To package your application into Docker container:
 ```
-./gradlew clean assemble
+./gradlew jibDockerBuild
 ```
 
 To run your application:
 ```
-./gradlew clean run
+docker run -p 8888:8888 -v /tmp/repo:/srv/repo rishabh9/kumoru
 ```
 
-== Help
+> `/tmp/repo` can be replaced with any path of your choice.
+> This is the location where the artifacts will be downloaded on the host machine.
 
-* https://vertx.io/docs/[Vert.x Documentation]
-* https://stackoverflow.com/questions/tagged/vert.x?sort=newest&pageSize=15[Vert.x Stack Overflow]
-* https://groups.google.com/forum/?fromgroups#!forum/vertx[Vert.x User Group]
-* https://gitter.im/eclipse-vertx/vertx-users[Vert.x Gitter]
+To enable access logs, set the environment variable `KUMORU_ACCESS_LOG=true` as:
+```
+docker run -e KUMORU_ACCESS_LOG=true -p 8888:8888 -v /tmp/repo:/srv/repo rishabh9/kumoru
+```
+
+> All logs are written to the `STDOUT`.
 
 
