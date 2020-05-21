@@ -17,7 +17,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
-import io.vertx.ext.web.handler.StaticHandler;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
