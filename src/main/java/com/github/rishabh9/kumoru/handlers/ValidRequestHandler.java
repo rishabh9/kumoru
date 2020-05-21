@@ -1,6 +1,7 @@
 package com.github.rishabh9.kumoru.handlers;
 
 import static io.vertx.core.http.HttpMethod.GET;
+import static io.vertx.core.http.HttpMethod.PUT;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
@@ -18,22 +19,23 @@ public class ValidRequestHandler extends KumoruHandler {
           .setStatusCode(METHOD_NOT_ALLOWED)
           .setStatusMessage("Method Not Allowed")
           .end();
-    }
-    final String path = routingContext.normalisedPath();
-    if (isValidPath(path)) {
-      routingContext.next();
     } else {
-      log.error("Path has invalid characters: {}", path);
-      routingContext
-          .response()
-          .setStatusCode(BAD_REQUEST)
-          .setStatusMessage("Path has invalid characters")
-          .end();
+      final String path = routingContext.normalisedPath();
+      if (isValidPath(path)) {
+        routingContext.next();
+      } else {
+        log.error("Path has invalid characters: {}", path);
+        routingContext
+            .response()
+            .setStatusCode(BAD_REQUEST)
+            .setStatusMessage("Path has invalid characters")
+            .end();
+      }
     }
   }
 
   private boolean isSupportedMethod(final HttpMethod method) {
-    return GET.equals(method);
+    return GET.equals(method) || PUT.equals(method);
   }
 
   private boolean isValidPath(final String path) {
