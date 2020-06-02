@@ -1,11 +1,11 @@
 package com.github.rishabh9.kumoru.handlers;
 
-import com.github.rishabh9.kumoru.VersionProperties;
+import static com.github.rishabh9.kumoru.KumoruCommon.REPO_ROOT;
+import static com.github.rishabh9.kumoru.KumoruCommon.createWebClient;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 import lombok.extern.log4j.Log4j2;
@@ -40,7 +40,7 @@ public abstract class AbstractMirrorHandler extends KumoruHandler {
       final String path = routingContext.normalisedPath();
       final String url = path.contains("SNAPSHOT") ? snapshotUrl : releaseUrl;
 
-      createWebClient(url)
+      createWebClient(vertx)
           .getAbs(url + path)
           .expect(ResponsePredicate.SC_SUCCESS)
           .as(BodyCodec.buffer())
@@ -109,16 +109,5 @@ public abstract class AbstractMirrorHandler extends KumoruHandler {
                     .end();
               }
             });
-  }
-
-  private WebClient createWebClient(final String host) {
-    final WebClientOptions webClientOptions =
-        new WebClientOptions()
-            .setDefaultHost(host)
-            .setSsl(true)
-            .setUserAgent("kumoru/" + VersionProperties.INSTANCE.getVersion())
-            .setFollowRedirects(true)
-            .setMaxRedirects(5);
-    return WebClient.create(vertx, webClientOptions);
   }
 }

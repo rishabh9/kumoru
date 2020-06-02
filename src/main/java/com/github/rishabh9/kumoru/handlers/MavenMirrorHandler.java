@@ -1,14 +1,13 @@
 package com.github.rishabh9.kumoru.handlers;
 
+import static com.github.rishabh9.kumoru.KumoruCommon.MAVEN_RELEASE_URL;
+import static com.github.rishabh9.kumoru.KumoruCommon.MAVEN_SNAPSHOT_URL;
+
 import io.vertx.core.Vertx;
 
 public class MavenMirrorHandler extends AbstractMirrorHandler {
 
-  private static final String RELEASE_URL = "https://repo.maven.apache.org/maven2";
-  private static final String SNAPSHOT_URL =
-      "https://oss.sonatype.org/content/repositories/snapshots";
-
   public MavenMirrorHandler(final Vertx vertx) {
-    super(vertx, RELEASE_URL, SNAPSHOT_URL);
+    super(vertx, MAVEN_RELEASE_URL, MAVEN_SNAPSHOT_URL);
   }
 }
