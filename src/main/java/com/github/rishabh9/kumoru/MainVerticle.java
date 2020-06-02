@@ -8,6 +8,7 @@ import com.github.rishabh9.kumoru.handlers.MavenMirrorHandler;
 import com.github.rishabh9.kumoru.handlers.SendFileHandler;
 import com.github.rishabh9.kumoru.handlers.UploadHandler;
 import com.github.rishabh9.kumoru.handlers.ValidRequestHandler;
+import com.github.rishabh9.kumoru.snapshots.ArtifactDownloadVerticle;
 import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -49,8 +50,10 @@ public class MainVerticle extends AbstractVerticle {
           }
         });
 
-    // Deploy snapshot update verticle
+    // Deploy snapshot update verticles
     vertx.deployVerticle(new SnapshotUpdateVerticle());
+    vertx.deployVerticle(new ArtifactDownloadVerticle());
+    vertx.deployVerticle(new ArtifactDownloadVerticle());
   }
 
   private Router setupRoutes(final KumoruConfig config) {

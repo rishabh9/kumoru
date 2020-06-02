@@ -21,6 +21,8 @@ public class KumoruCommon {
 
   public static final List<String> SNAPSHOT_URLS;
 
+  public static final String ARTIFACT_VERTICLE = "artifactVerticle";
+
   static {
     final int initialCapacity = 3;
     SNAPSHOT_URLS = new ArrayList<>(initialCapacity);

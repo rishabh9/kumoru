@@ -5,9 +5,8 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import io.vertx.core.buffer.Buffer;
-
-import javax.xml.stream.XMLStreamException;
 import java.util.HashSet;
+import javax.xml.stream.XMLStreamException;
 
 public final class KumoruAsyncXmlParser {
 

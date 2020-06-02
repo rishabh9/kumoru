@@ -1,11 +1,10 @@
 package com.github.rishabh9.kumoru.snapshots;
 
-import lombok.extern.log4j.Log4j2;
-
 import java.io.ByteArrayInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 class FileComparator {
