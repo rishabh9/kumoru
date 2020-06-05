@@ -2,6 +2,8 @@ package com.github.rishabh9.kumoru.web;
 
 import com.github.rishabh9.kumoru.common.KumoruConfig;
 import com.github.rishabh9.kumoru.common.VersionProperties;
+import com.github.rishabh9.kumoru.snapshots.ArtifactDownloadVerticle;
+import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateVerticle;
 import com.github.rishabh9.kumoru.web.handlers.FinalHandler;
 import com.github.rishabh9.kumoru.web.handlers.JCenterMirrorHandler;
 import com.github.rishabh9.kumoru.web.handlers.JitPackMirrorHandler;
@@ -10,8 +12,6 @@ import com.github.rishabh9.kumoru.web.handlers.MavenMirrorHandler;
 import com.github.rishabh9.kumoru.web.handlers.SendFileHandler;
 import com.github.rishabh9.kumoru.web.handlers.UploadHandler;
 import com.github.rishabh9.kumoru.web.handlers.ValidRequestHandler;
-import com.github.rishabh9.kumoru.snapshots.ArtifactDownloadVerticle;
-import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
