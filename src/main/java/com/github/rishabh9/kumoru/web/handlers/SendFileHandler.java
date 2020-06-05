@@ -1,6 +1,6 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
-import com.github.rishabh9.kumoru.KumoruCommon;
+import com.github.rishabh9.kumoru.common.KumoruCommon;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import lombok.extern.log4j.Log4j2;

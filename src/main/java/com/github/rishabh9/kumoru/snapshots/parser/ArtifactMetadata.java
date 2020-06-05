@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru.parser;
+package com.github.rishabh9.kumoru.snapshots.parser;
 
 import lombok.Data;
 

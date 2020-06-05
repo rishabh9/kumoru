@@ -1,6 +1,6 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
-import static com.github.rishabh9.kumoru.KumoruCommon.JITPACK_RELEASE_URL;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.JITPACK_RELEASE_URL;
 
 import io.vertx.core.Vertx;
 

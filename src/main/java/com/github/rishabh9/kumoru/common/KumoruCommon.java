@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru;
+package com.github.rishabh9.kumoru.common;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;

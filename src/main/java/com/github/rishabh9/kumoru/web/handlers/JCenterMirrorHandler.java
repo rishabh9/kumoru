@@ -1,7 +1,7 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
-import static com.github.rishabh9.kumoru.KumoruCommon.JCENTER_RELEASE_URL;
-import static com.github.rishabh9.kumoru.KumoruCommon.JCENTER_SNAPSHOT_URL;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.JCENTER_RELEASE_URL;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.JCENTER_SNAPSHOT_URL;
 
 import io.vertx.core.Vertx;
 

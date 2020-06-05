@@ -1,7 +1,7 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
-import static com.github.rishabh9.kumoru.KumoruCommon.REPO_ROOT;
-import static com.github.rishabh9.kumoru.KumoruCommon.createWebClient;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.REPO_ROOT;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.createWebClient;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;

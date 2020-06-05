@@ -1,13 +1,15 @@
-package com.github.rishabh9.kumoru;
+package com.github.rishabh9.kumoru.web;
 
-import com.github.rishabh9.kumoru.handlers.FinalHandler;
-import com.github.rishabh9.kumoru.handlers.JCenterMirrorHandler;
-import com.github.rishabh9.kumoru.handlers.JitPackMirrorHandler;
-import com.github.rishabh9.kumoru.handlers.LocalResourceHandler;
-import com.github.rishabh9.kumoru.handlers.MavenMirrorHandler;
-import com.github.rishabh9.kumoru.handlers.SendFileHandler;
-import com.github.rishabh9.kumoru.handlers.UploadHandler;
-import com.github.rishabh9.kumoru.handlers.ValidRequestHandler;
+import com.github.rishabh9.kumoru.common.KumoruConfig;
+import com.github.rishabh9.kumoru.common.VersionProperties;
+import com.github.rishabh9.kumoru.web.handlers.FinalHandler;
+import com.github.rishabh9.kumoru.web.handlers.JCenterMirrorHandler;
+import com.github.rishabh9.kumoru.web.handlers.JitPackMirrorHandler;
+import com.github.rishabh9.kumoru.web.handlers.LocalResourceHandler;
+import com.github.rishabh9.kumoru.web.handlers.MavenMirrorHandler;
+import com.github.rishabh9.kumoru.web.handlers.SendFileHandler;
+import com.github.rishabh9.kumoru.web.handlers.UploadHandler;
+import com.github.rishabh9.kumoru.web.handlers.ValidRequestHandler;
 import com.github.rishabh9.kumoru.snapshots.ArtifactDownloadVerticle;
 import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateVerticle;
 import io.vertx.core.AbstractVerticle;
@@ -22,7 +24,7 @@ import io.vertx.ext.web.handler.LoggerHandler;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class MainVerticle extends AbstractVerticle {
+public class WebVerticle extends AbstractVerticle {
 
   @Override
   public void start(final Promise<Void> startFuture) {

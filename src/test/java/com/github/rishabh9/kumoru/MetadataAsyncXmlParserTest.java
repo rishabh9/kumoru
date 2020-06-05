@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.github.rishabh9.kumoru.parser.ArtifactMetadata;
-import com.github.rishabh9.kumoru.parser.KumoruAsyncXmlParser;
-import com.github.rishabh9.kumoru.parser.SnapshotMetadata;
+import com.github.rishabh9.kumoru.snapshots.parser.ArtifactMetadata;
+import com.github.rishabh9.kumoru.snapshots.parser.MetadataAsyncXmlParser;
+import com.github.rishabh9.kumoru.snapshots.parser.SnapshotMetadata;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.buffer.impl.BufferImpl;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 import org.junit.jupiter.api.Test;
 
-class KumoruAsyncXmlParserTest {
+class MetadataAsyncXmlParserTest {
 
   @Test
   void parseXmlExtractArtifactId_success() {
@@ -27,7 +27,7 @@ class KumoruAsyncXmlParserTest {
             + "</metadata>";
     buffer.setBytes(0, builder.getBytes());
 
-    final KumoruAsyncXmlParser parser = new KumoruAsyncXmlParser();
+    final MetadataAsyncXmlParser parser = new MetadataAsyncXmlParser();
     try {
       final SnapshotMetadata metadata = parser.parse(buffer);
       assertEquals("groovy", metadata.getArtifactId());
@@ -72,7 +72,7 @@ class KumoruAsyncXmlParserTest {
             + "</metadata>\n";
     buffer.setBytes(0, builder.getBytes());
 
-    final KumoruAsyncXmlParser parser = new KumoruAsyncXmlParser();
+    final MetadataAsyncXmlParser parser = new MetadataAsyncXmlParser();
     try {
       final SnapshotMetadata metadata = parser.parse(buffer);
       assertEquals("groovy", metadata.getArtifactId());
@@ -103,7 +103,7 @@ class KumoruAsyncXmlParserTest {
             + "<artifactId>groovy</artifactId>";
     buffer.setBytes(0, builder.getBytes());
 
-    final KumoruAsyncXmlParser parser = new KumoruAsyncXmlParser();
+    final MetadataAsyncXmlParser parser = new MetadataAsyncXmlParser();
     try {
       final SnapshotMetadata metadata = parser.parse(buffer);
       assertNull(metadata.getArtifactId());

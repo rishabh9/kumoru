@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru.parser;
+package com.github.rishabh9.kumoru.snapshots.parser;
 
 import com.fasterxml.aalto.AsyncByteArrayFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
@@ -8,7 +8,7 @@ import io.vertx.core.buffer.Buffer;
 import java.util.HashSet;
 import javax.xml.stream.XMLStreamException;
 
-public final class KumoruAsyncXmlParser {
+public final class MetadataAsyncXmlParser {
 
   private static final String SNAPSHOT_VERSIONS = "snapshotVersions";
   private static final String SNAPSHOT_VERSION = "snapshotVersion";

@@ -1,8 +1,8 @@
 package com.github.rishabh9.kumoru.snapshots;
 
-import static com.github.rishabh9.kumoru.KumoruCommon.REPO_ROOT;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.REPO_ROOT;
 
-import com.github.rishabh9.kumoru.parser.ArtifactMetadata;
+import com.github.rishabh9.kumoru.snapshots.parser.ArtifactMetadata;
 import lombok.Getter;
 import lombok.Setter;
 

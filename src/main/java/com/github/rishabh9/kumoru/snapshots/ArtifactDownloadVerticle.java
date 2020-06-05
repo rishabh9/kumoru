@@ -1,9 +1,9 @@
 package com.github.rishabh9.kumoru.snapshots;
 
-import static com.github.rishabh9.kumoru.KumoruCommon.ARTIFACT_VERTICLE;
-import static com.github.rishabh9.kumoru.KumoruCommon.REPO_ROOT;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.ARTIFACT_VERTICLE;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.REPO_ROOT;
 
-import com.github.rishabh9.kumoru.KumoruCommon;
+import com.github.rishabh9.kumoru.common.KumoruCommon;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.client.WebClient;

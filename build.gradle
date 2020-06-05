@@ -41,7 +41,7 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
-def mainVerticleName = 'com.github.rishabh9.kumoru.MainVerticle'
+def mainVerticleName = 'com.github.rishabh9.kumoru.web.WebVerticle'
 def watchForChange = 'src/**/*'
 def doOnChange = './gradlew classes'
 

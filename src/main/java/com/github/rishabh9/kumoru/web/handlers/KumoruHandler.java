@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;

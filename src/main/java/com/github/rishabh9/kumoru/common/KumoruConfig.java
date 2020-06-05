@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru;
+package com.github.rishabh9.kumoru.common;
 
 import lombok.extern.log4j.Log4j2;
 

@@ -1,12 +1,12 @@
 package com.github.rishabh9.kumoru.snapshots;
 
-import static com.github.rishabh9.kumoru.KumoruCommon.ARTIFACT_VERTICLE;
-import static com.github.rishabh9.kumoru.KumoruCommon.REPO_ROOT;
-import static com.github.rishabh9.kumoru.KumoruCommon.SNAPSHOT_URLS;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.ARTIFACT_VERTICLE;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.REPO_ROOT;
+import static com.github.rishabh9.kumoru.common.KumoruCommon.SNAPSHOT_URLS;
 
-import com.github.rishabh9.kumoru.KumoruCommon;
-import com.github.rishabh9.kumoru.parser.KumoruAsyncXmlParser;
-import com.github.rishabh9.kumoru.parser.SnapshotMetadata;
+import com.github.rishabh9.kumoru.common.KumoruCommon;
+import com.github.rishabh9.kumoru.snapshots.parser.MetadataAsyncXmlParser;
+import com.github.rishabh9.kumoru.snapshots.parser.SnapshotMetadata;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -66,7 +66,7 @@ public class SnapshotUpdateVerticle extends AbstractVerticle {
                   visit(fileOrDirectory);
                   if (fileOrDirectory.endsWith(SNAPSHOT)) {
                     // Since filename ends with "-SNAPSHOT", it's a directory we need to update
-                    log.debug("Processing directory {}", fileOrDirectory);
+                    log.debug("Found snapshot to update {}", fileOrDirectory);
                     final UpdateMessage message = new UpdateMessage(fileOrDirectory);
                     nextMirror(SNAPSHOT_URLS.iterator(), message);
                   }
@@ -142,7 +142,7 @@ public class SnapshotUpdateVerticle extends AbstractVerticle {
     log.debug("Parsing metadata.xml...");
     SnapshotMetadata metadata = null;
     try {
-      metadata = KumoruAsyncXmlParser.parse(buffer);
+      metadata = MetadataAsyncXmlParser.parse(buffer);
     } catch (XMLStreamException e) {
       // Stop processing it further
       log.fatal("There was an error processing the downloaded metadata.xml", e);
