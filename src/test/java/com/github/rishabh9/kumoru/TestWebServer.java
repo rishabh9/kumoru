@@ -1,6 +1,6 @@
 package com.github.rishabh9.kumoru;
 
-import com.github.rishabh9.kumoru.web.WebVerticle;
+import com.github.rishabh9.kumoru.web.WebServer;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -9,12 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
-public class TestWebVerticle {
+public class TestWebServer {
 
   @BeforeEach
   void deploy_verticle(final Vertx vertx, final VertxTestContext testContext) {
-    vertx.deployVerticle(
-        new WebVerticle(), testContext.succeeding(id -> testContext.completeNow()));
+    vertx.deployVerticle(new WebServer(), testContext.succeeding(id -> testContext.completeNow()));
   }
 
   @Test

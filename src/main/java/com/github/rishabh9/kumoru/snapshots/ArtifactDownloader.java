@@ -12,7 +12,7 @@ import io.vertx.ext.web.codec.BodyCodec;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class ArtifactDownloadVerticle extends AbstractVerticle {
+public class ArtifactDownloader extends AbstractVerticle {
 
   private static final String HYPHEN = "-";
   private static final String SLASH = "/";

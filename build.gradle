@@ -17,7 +17,7 @@ repositories {
 }
 
 ext {
-  vertxVersion = '3.9.0'
+  vertxVersion = '3.9.1'
   junitJupiterEngineVersion = '5.4.0'
   log4j2Version = '2.13.2'
   disruptorVersion = '3.4.2'
@@ -41,7 +41,7 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
-def mainVerticleName = 'com.github.rishabh9.kumoru.web.WebVerticle'
+def mainVerticleName = 'com.github.rishabh9.kumoru.MainVerticle'
 def watchForChange = 'src/**/*'
 def doOnChange = './gradlew classes'
 

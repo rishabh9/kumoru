@@ -2,8 +2,6 @@ package com.github.rishabh9.kumoru.web;
 
 import com.github.rishabh9.kumoru.common.KumoruConfig;
 import com.github.rishabh9.kumoru.common.VersionProperties;
-import com.github.rishabh9.kumoru.snapshots.ArtifactDownloadVerticle;
-import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateVerticle;
 import com.github.rishabh9.kumoru.web.handlers.FinalHandler;
 import com.github.rishabh9.kumoru.web.handlers.JCenterMirrorHandler;
 import com.github.rishabh9.kumoru.web.handlers.JitPackMirrorHandler;
@@ -24,7 +22,7 @@ import io.vertx.ext.web.handler.LoggerHandler;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class WebVerticle extends AbstractVerticle {
+public class WebServer extends AbstractVerticle {
 
   @Override
   public void start(final Promise<Void> startFuture) {
@@ -44,18 +42,13 @@ public class WebVerticle extends AbstractVerticle {
           if (asyncResult.succeeded()) {
             startFuture.complete();
             log.info(
-                "Kumoru server [v{}] started on port {}",
+                "Kumoru web server [v{}] started on port {}",
                 VersionProperties.INSTANCE.getVersion(),
                 port);
           } else {
             startFuture.fail(asyncResult.cause());
           }
         });
-
-    // Deploy snapshot update verticles
-    vertx.deployVerticle(new SnapshotUpdateVerticle());
-    vertx.deployVerticle(new ArtifactDownloadVerticle());
-    vertx.deployVerticle(new ArtifactDownloadVerticle());
   }
 
   private Router setupRoutes(final KumoruConfig config) {

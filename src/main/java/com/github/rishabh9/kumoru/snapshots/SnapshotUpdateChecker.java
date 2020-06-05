@@ -25,7 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class SnapshotUpdateVerticle extends AbstractVerticle {
+public class SnapshotUpdateChecker extends AbstractVerticle {
 
   private static final String SNAPSHOT = "-SNAPSHOT";
 
@@ -40,14 +40,15 @@ public class SnapshotUpdateVerticle extends AbstractVerticle {
         TimeUnit.SECONDS.toMillis(interval),
         id -> {
           final ZonedDateTime now = ZonedDateTime.now();
-          log.info("Snapshot updater started...");
+          log.info("Snapshot update checker started...");
           // Start from repository root folder,
           // and recursively visit each folder.
           visit(REPO_ROOT);
           log.info(
-              "Snapshot updater finished. Next update at {}",
+              "Next snapshot update check at {}",
               now.plus(Duration.ofSeconds(interval)).format(DateTimeFormatter.ISO_DATE_TIME));
         });
+    log.info("Snapshot verticle started");
     startPromise.complete();
   }
 
