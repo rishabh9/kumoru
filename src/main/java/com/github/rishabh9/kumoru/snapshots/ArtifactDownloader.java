@@ -6,6 +6,7 @@ import static com.github.rishabh9.kumoru.common.KumoruCommon.REPO_ROOT;
 import com.github.rishabh9.kumoru.common.KumoruCommon;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -19,20 +20,46 @@ public class ArtifactDownloader extends AbstractVerticle {
   private static final String DOT = ".";
 
   private WebClient webClient;
+  private MessageConsumer<UpdateMessage> messageConsumer;
 
   @Override
   public void start(final Promise<Void> startPromise) {
     webClient = KumoruCommon.createWebClient(vertx);
-    vertx
-        .eventBus()
-        .consumer(
-            ARTIFACT_VERTICLE,
-            message -> {
-              log.debug("Message received...");
-              final UpdateMessage dto = (UpdateMessage) message.body();
-              downloadArtifact(dto);
-            });
+    messageConsumer =
+        vertx
+            .eventBus()
+            .consumer(
+                ARTIFACT_VERTICLE,
+                message -> {
+                  log.debug("Message received...");
+                  final UpdateMessage dto = message.body();
+                  downloadArtifact(dto);
+                });
+    log.debug("Artifact downloader started");
     startPromise.complete();
+  }
+
+  @Override
+  public void stop(final Promise<Void> stopPromise) {
+    if (null != messageConsumer && messageConsumer.isRegistered()) {
+      log.debug("Un-registering consumer...");
+      messageConsumer.unregister(
+          unregisterResult -> {
+            if (unregisterResult.succeeded()) {
+              log.debug("Consumer un-registered");
+              if (null != webClient) {
+                log.debug("Closing web client...");
+                webClient.close();
+              }
+              stopPromise.complete();
+            } else {
+              log.fatal("Unable to un-register consumer", unregisterResult.cause());
+              stopPromise.fail(unregisterResult.cause());
+            }
+          });
+    } else {
+      stopPromise.complete();
+    }
   }
 
   private void downloadArtifact(final UpdateMessage dto) {

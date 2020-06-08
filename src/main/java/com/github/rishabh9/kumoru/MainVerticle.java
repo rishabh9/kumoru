@@ -1,5 +1,7 @@
 package com.github.rishabh9.kumoru;
 
+import com.github.rishabh9.kumoru.common.KumoruConfig;
+import com.github.rishabh9.kumoru.common.VersionProperties;
 import com.github.rishabh9.kumoru.snapshots.ArtifactDownloader;
 import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateChecker;
 import com.github.rishabh9.kumoru.web.WebServer;
@@ -8,7 +10,6 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Verticle;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +28,10 @@ public class MainVerticle extends AbstractVerticle {
             success -> {
               log.debug("Successfully deployed all verticles");
               deploymentIds = success.list();
+              log.info(
+                  "Kumoru server [v{}] is up and running on port {}",
+                  VersionProperties.INSTANCE.getVersion(),
+                  KumoruConfig.INSTANCE.getKumoruPort());
               startPromise.complete();
             })
         .onFailure(
@@ -41,12 +46,12 @@ public class MainVerticle extends AbstractVerticle {
     final int processors = Runtime.getRuntime().availableProcessors();
     final DeploymentOptions webServerOptions = new DeploymentOptions();
     webServerOptions.setInstances(processors * 2);
-    return deploy(new WebServer(), webServerOptions);
+    return deploy(WebServer.class.getName(), webServerOptions);
   }
 
   private Future<String> deploySnapshotUpdateChecker() {
     // Deploy snapshot update verticle
-    return deploy(new SnapshotUpdateChecker(), new DeploymentOptions());
+    return deploy(SnapshotUpdateChecker.class.getName(), new DeploymentOptions());
   }
 
   private Future<String> deployArtifactDownloader() {
@@ -54,14 +59,14 @@ public class MainVerticle extends AbstractVerticle {
     final int processors = Runtime.getRuntime().availableProcessors();
     final DeploymentOptions downloaderOptions = new DeploymentOptions();
     downloaderOptions.setInstances(processors);
-    return deploy(new ArtifactDownloader(), downloaderOptions);
+    return deploy(ArtifactDownloader.class.getName(), downloaderOptions);
   }
 
   private Future<String> deploy(
-      final Verticle verticle, final DeploymentOptions deploymentOptions) {
+      final String verticleName, final DeploymentOptions deploymentOptions) {
     final Promise<String> promise = Promise.promise();
     vertx.deployVerticle(
-        verticle,
+        verticleName,
         deploymentOptions,
         deploymentResult -> {
           if (deploymentResult.succeeded()) {

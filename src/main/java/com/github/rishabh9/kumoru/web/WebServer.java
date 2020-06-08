@@ -1,7 +1,6 @@
 package com.github.rishabh9.kumoru.web;
 
 import com.github.rishabh9.kumoru.common.KumoruConfig;
-import com.github.rishabh9.kumoru.common.VersionProperties;
 import com.github.rishabh9.kumoru.web.handlers.FinalHandler;
 import com.github.rishabh9.kumoru.web.handlers.JCenterMirrorHandler;
 import com.github.rishabh9.kumoru.web.handlers.JitPackMirrorHandler;
@@ -24,36 +23,50 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class WebServer extends AbstractVerticle {
 
+  private HttpServer httpServer;
+
   @Override
   public void start(final Promise<Void> startFuture) {
 
     // Get configuration
-    final KumoruConfig config = new KumoruConfig();
-    final int port = config.getKumoruPort();
-    final Router router = setupRoutes(config);
+    final int port = KumoruConfig.INSTANCE.getKumoruPort();
+    final Router router = setupRoutes();
 
     // Logging network server activity
     final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
-    final HttpServer httpServer = vertx.createHttpServer(options);
+    httpServer = vertx.createHttpServer(options);
     httpServer.requestHandler(router);
     httpServer.listen(
         port,
         asyncResult -> {
           if (asyncResult.succeeded()) {
+            log.debug("Web server running on port {}", port);
             startFuture.complete();
-            log.info(
-                "Kumoru web server [v{}] started on port {}",
-                VersionProperties.INSTANCE.getVersion(),
-                port);
           } else {
+            log.fatal("Failed to start web server", asyncResult.cause());
             startFuture.fail(asyncResult.cause());
           }
         });
   }
 
-  private Router setupRoutes(final KumoruConfig config) {
-    final boolean enableAccessLog = config.enableAccessLog();
-    final long bodyLimit = config.getBodyLimit();
+  @Override
+  public void stop(final Promise<Void> stopPromise) {
+    log.debug("Stopping web verticle...");
+    if (null != httpServer) {
+      httpServer.close(
+          closeResult -> {
+            if (closeResult.succeeded()) {
+              log.debug("Web server stopped");
+              stopPromise.complete();
+            } else {
+              log.fatal("Failed to stop web server", closeResult.cause());
+              stopPromise.fail(closeResult.cause());
+            }
+          });
+    }
+  }
+
+  private Router setupRoutes() {
 
     // All handlers
     final ValidRequestHandler validRequestHandler = new ValidRequestHandler();
@@ -68,7 +81,7 @@ public class WebServer extends AbstractVerticle {
     final Router router = Router.router(vertx);
     // for all routes do
     final Route route = router.route();
-    if (enableAccessLog) {
+    if (KumoruConfig.INSTANCE.isEnableAccessLog()) {
       route.handler(LoggerHandler.create(LoggerFormat.DEFAULT));
     }
     route.handler(validRequestHandler);
@@ -86,7 +99,10 @@ public class WebServer extends AbstractVerticle {
     // for PUT method do
     router
         .put()
-        .handler(BodyHandler.create().setBodyLimit(bodyLimit).setDeleteUploadedFilesOnEnd(true))
+        .handler(
+            BodyHandler.create()
+                .setBodyLimit(KumoruConfig.INSTANCE.getBodyLimit())
+                .setDeleteUploadedFilesOnEnd(true))
         .handler(uploadHandler);
 
     return router;

@@ -28,28 +28,41 @@ import lombok.extern.log4j.Log4j2;
 public class SnapshotUpdateChecker extends AbstractVerticle {
 
   private static final String SNAPSHOT = "-SNAPSHOT";
-
-  private WebClient webClient;
+  private static long timerId;
+  private static WebClient webClient;
 
   @Override
   public void start(final Promise<Void> startPromise) {
-
+    log.debug("Starting snapshot updater");
     webClient = KumoruCommon.createWebClient(vertx);
     final int interval = 30;
-    vertx.setPeriodic(
-        TimeUnit.SECONDS.toMillis(interval),
-        id -> {
-          final ZonedDateTime now = ZonedDateTime.now();
-          log.info("Snapshot update checker started...");
-          // Start from repository root folder,
-          // and recursively visit each folder.
-          visit(REPO_ROOT);
-          log.info(
-              "Next snapshot update check at {}",
-              now.plus(Duration.ofSeconds(interval)).format(DateTimeFormatter.ISO_DATE_TIME));
-        });
-    log.info("Snapshot verticle started");
+    timerId =
+        vertx.setPeriodic(
+            TimeUnit.SECONDS.toMillis(interval),
+            id -> {
+              final ZonedDateTime now = ZonedDateTime.now();
+              log.debug("Snapshot update checker started...");
+              // Start from repository root folder,
+              // and recursively visit each folder.
+              visit(REPO_ROOT);
+              log.debug(
+                  "Next snapshot update check at {}",
+                  now.plus(Duration.ofSeconds(interval)).format(DateTimeFormatter.ISO_DATE_TIME));
+            });
+    log.debug("Snapshot updater started with timer-id {}", timerId);
     startPromise.complete();
+  }
+
+  @Override
+  public void stop(final Promise<Void> stopPromise) {
+    log.debug("Stopping snapshot updater");
+    log.debug("Closing web client...");
+    webClient.close();
+    if (timerId != 0) {
+      log.debug("Cancelling timer... {}", timerId);
+      vertx.cancelTimer(timerId);
+    }
+    stopPromise.complete();
   }
 
   private void visit(final String path) {

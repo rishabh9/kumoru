@@ -1,22 +1,37 @@
 package com.github.rishabh9.kumoru.common;
 
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class KumoruConfig {
+
+  public static final KumoruConfig INSTANCE = new KumoruConfig();
+
+  @Getter private final int bodyLimit;
+  @Getter private final boolean enableAccessLog;
+  @Getter private final int kumoruPort;
+
+  private KumoruConfig() {
+    bodyLimit = getLimit();
+    enableAccessLog = isAccessLogEnabled();
+    kumoruPort = getPort();
+  }
 
   /**
    * Fetch the configured limit for uploads.
    *
    * @return Body limit
    */
-  public int getBodyLimit() {
+  private int getLimit() {
     // Body limited to 50MB
     final int defaultBodyLimit = 50000000;
-    final String bodyLimit = System.getenv("KUMORU_BODY_LIMIT");
-    log.debug("Body limit configured as {} bytes", bodyLimit);
-    if (null != bodyLimit && !bodyLimit.isEmpty() && !bodyLimit.matches(".*\\D.*")) {
-      return Integer.parseInt(bodyLimit);
+    final String kumoruBodyLimit = System.getenv("KUMORU_BODY_LIMIT");
+    log.debug("Body limit configured as {} bytes", kumoruBodyLimit);
+    if (null != kumoruBodyLimit
+        && !kumoruBodyLimit.isEmpty()
+        && !kumoruBodyLimit.matches(".*\\D.*")) {
+      return Integer.parseInt(kumoruBodyLimit);
     } else {
       log.debug("Setting body limit as {} bytes", defaultBodyLimit);
       return defaultBodyLimit;
@@ -28,7 +43,7 @@ public final class KumoruConfig {
    *
    * @return TRUE if access logs are enabled, else FALSE.
    */
-  public boolean enableAccessLog() {
+  private boolean isAccessLogEnabled() {
     final String flag = System.getenv("KUMORU_ACCESS_LOG");
     if (null != flag && !flag.isEmpty() && flag.matches("^(true|false)$")) {
       return Boolean.parseBoolean(flag);
@@ -42,7 +57,7 @@ public final class KumoruConfig {
    * @return The port to listen on.
    */
   // I see no utility of this facility if deployed as a Docker container.
-  public int getKumoruPort() {
+  private int getPort() {
     final int defaultPort = 8888;
     final String port = System.getenv("KUMORU_PORT");
     log.debug("Port configured as {}", port);
