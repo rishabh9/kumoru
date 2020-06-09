@@ -65,7 +65,7 @@ public class ArtifactDownloader extends AbstractVerticle {
   private void downloadArtifact(final UpdateMessage dto) {
 
     final String absoluteUri = buildUrl(dto);
-    log.info("Downloading {}", absoluteUri);
+    log.debug("Downloading {}", absoluteUri);
     webClient
         .getAbs(absoluteUri)
         .expect(ResponsePredicate.SC_SUCCESS)

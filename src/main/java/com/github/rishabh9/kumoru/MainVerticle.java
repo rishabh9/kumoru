@@ -56,9 +56,8 @@ public class MainVerticle extends AbstractVerticle {
 
   private Future<String> deployArtifactDownloader() {
     // Deploy verticle to help snapshot updates
-    // final int processors = Runtime.getRuntime().availableProcessors();
-    final DeploymentOptions downloaderOptions = new DeploymentOptions();
-    // .setInstances(processors)
+    final int processors = Runtime.getRuntime().availableProcessors();
+    final DeploymentOptions downloaderOptions = new DeploymentOptions().setInstances(processors);
     // .setWorkerPoolName("artifact-download-pool")
     // .setWorkerPoolSize(processors)
     // .setWorker(true);
