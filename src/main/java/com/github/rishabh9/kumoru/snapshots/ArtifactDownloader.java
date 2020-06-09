@@ -31,8 +31,8 @@ public class ArtifactDownloader extends AbstractVerticle {
             .consumer(
                 ARTIFACT_VERTICLE,
                 message -> {
-                  log.debug("Message received...");
                   final UpdateMessage dto = message.body();
+                  log.debug("Message received... {}", dto);
                   downloadArtifact(dto);
                 });
     log.debug("Artifact downloader started");
