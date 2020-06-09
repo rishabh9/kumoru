@@ -2,8 +2,6 @@ plugins {
   id 'java'
   id 'application'
   id 'checkstyle'
-  id 'maven-publish'
-  id 'signing'
   id 'io.freefair.lombok' version '5.0.1'
   id 'com.limark.gitflowsemver' version '0.3.1'
   id 'com.diffplug.gradle.spotless' version '3.29.0'
@@ -101,68 +99,6 @@ jib {
     mainClass = mainClassName
     args = ['run', mainVerticleName]
   }
-}
-
-publishing {
-
-  repositories {
-    maven {
-      def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-      def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
-      url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-      credentials {
-        username ossNexusUsername
-        password ossNexusPassword
-      }
-    }
-  }
-
-  publications {
-    mavenJava(MavenPublication) {
-      artifactId = 'kumoru'
-
-      from components.java
-
-      pom {
-        name = 'kumoru'
-        description = 'A minimal Nexus repository to practice Vert.x'
-        url = 'https://github.com/rishabh9/kumoru'
-        developers {
-          developer {
-            id = 'rishabh'
-            name = 'Rishabh Joshi'
-            email = 'rishabh9@gmail.com'
-          }
-        }
-        licenses {
-          license {
-            name = 'The Apache License, Version 2.0'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-          }
-        }
-        scm {
-          connection = 'scm:git:ssh://git@github.com:rishabh9/kumoru.git'
-          developerConnection = 'scm:git:ssh://git@github.com:rishabh9/kumoru.git'
-          url = 'https://github.com/rishabh9/kumoru'
-        }
-      }
-    }
-  }
-}
-
-signing {
-  sign publishing.publications.mavenJava
-}
-
-javadoc {
-  if (JavaVersion.current().isJava9Compatible()) {
-    options.addBooleanOption('html5', true)
-  }
-}
-
-// Nexus still does not support Gradle metadata, so disable
-tasks.withType(GenerateModuleMetadata) {
-  enabled = false
 }
 
 spotless {
