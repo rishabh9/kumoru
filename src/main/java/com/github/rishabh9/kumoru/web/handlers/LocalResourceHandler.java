@@ -1,5 +1,6 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
+import com.github.rishabh9.kumoru.common.KumoruCommon;
 import io.vertx.core.Vertx;
 import io.vertx.core.file.FileSystem;
 import io.vertx.ext.web.RoutingContext;
@@ -22,7 +23,7 @@ public class LocalResourceHandler extends KumoruHandler {
   public void handle(final RoutingContext routingContext) {
     final FileSystem fileSystem = vertx.fileSystem();
     final String path = routingContext.normalisedPath();
-    final String absolutePath = REPO_ROOT + path;
+    final String absolutePath = KumoruCommon.REPO_ROOT + path;
     fileSystem.exists(
         absolutePath,
         asyncResult -> {

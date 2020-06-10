@@ -1,14 +1,14 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
+
+import static com.github.rishabh9.kumoru.common.KumoruCommon.JITPACK_RELEASE_URL;
 
 import io.vertx.core.Vertx;
 
 public class JitPackMirrorHandler extends AbstractMirrorHandler {
 
-  private static final String RELEASE_URL = "https://jitpack.io";
-
   // Jitpack does not have a separate snapshot repository url.
   // The release URL is valid for both.
   public JitPackMirrorHandler(final Vertx vertx) {
-    super(vertx, RELEASE_URL, RELEASE_URL);
+    super(vertx, JITPACK_RELEASE_URL, JITPACK_RELEASE_URL);
   }
 }

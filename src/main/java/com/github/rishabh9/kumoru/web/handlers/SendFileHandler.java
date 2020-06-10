@@ -1,5 +1,6 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
+import com.github.rishabh9.kumoru.common.KumoruCommon;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +18,7 @@ public class SendFileHandler extends KumoruHandler {
     if (resourceFound(routingContext)) {
       final String path = routingContext.normalisedPath();
       log.debug("Sending resource {}", path);
-      final String absolutePath = REPO_ROOT + path;
+      final String absolutePath = KumoruCommon.REPO_ROOT + path;
       final String filename = path.substring(path.lastIndexOf("/") + 1);
       final String mimeType = new Tika().detect(absolutePath);
       log.debug("Filename: {}, MimeType: {}", filename, mimeType);

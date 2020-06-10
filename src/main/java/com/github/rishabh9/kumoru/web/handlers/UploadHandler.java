@@ -1,5 +1,6 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
+import com.github.rishabh9.kumoru.common.KumoruCommon;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +18,7 @@ public class UploadHandler extends KumoruHandler {
   public void handle(final RoutingContext routingContext) {
     final String path = routingContext.normalisedPath();
     final String subPath = path.substring(0, path.lastIndexOf("/"));
-    final String directory = REPO_ROOT + subPath;
+    final String directory = KumoruCommon.REPO_ROOT + subPath;
     vertx
         .fileSystem()
         .exists(
@@ -60,7 +61,7 @@ public class UploadHandler extends KumoruHandler {
     vertx
         .fileSystem()
         .writeFile(
-            REPO_ROOT + path,
+            KumoruCommon.REPO_ROOT + path,
             routingContext.getBody(),
             writeResult -> {
               if (writeResult.succeeded()) {

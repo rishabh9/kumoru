@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru;
+package com.github.rishabh9.kumoru.common;
 
 import java.io.IOException;
 import java.util.Properties;
