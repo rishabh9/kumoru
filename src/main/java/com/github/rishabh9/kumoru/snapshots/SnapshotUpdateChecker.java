@@ -8,6 +8,8 @@ import com.github.rishabh9.kumoru.common.KumoruCommon;
 import com.github.rishabh9.kumoru.snapshots.parser.MetadataAsyncXmlParser;
 import com.github.rishabh9.kumoru.snapshots.parser.SnapshotMetadata;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -22,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,10 +41,10 @@ public class SnapshotUpdateChecker extends AbstractVerticle {
     log.debug("Starting snapshot updater");
     webClient = KumoruCommon.createWebClient(vertx);
     vertx.eventBus().registerDefaultCodec(UpdateMessage.class, new UpdateMessageCodec());
-    final int interval = 12;
+    final int interval = 60;
     timerId =
         vertx.setPeriodic(
-            TimeUnit.HOURS.toMillis(interval),
+            TimeUnit.SECONDS.toMillis(interval),
             id -> {
               final ZonedDateTime now = ZonedDateTime.now();
               log.debug("Snapshot update checker started...");
@@ -110,7 +113,15 @@ public class SnapshotUpdateChecker extends AbstractVerticle {
                   final String metadataXmlFileSystemPath = fileOrDirectory + METADATA_XML;
                   if (isSnapshotUpdated(downloadedFile, metadataXmlFileSystemPath)) {
                     log.debug("New snapshot available from {}", uri);
-                    updateSnapshot(metadataXmlFileSystemPath, snapshotPath, mirror, result.body());
+                    deleteOldSnapshots(fileOrDirectory)
+                        .onComplete(
+                            asyncResult ->
+                                // Update after attempting to delete is complete
+                                updateSnapshot(
+                                    metadataXmlFileSystemPath,
+                                    snapshotPath,
+                                    mirror,
+                                    result.body()));
                   }
                 } else {
                   log.debug("Unable to retrieve metadata from {}", uri, asyncWebResult.cause());
@@ -118,6 +129,49 @@ public class SnapshotUpdateChecker extends AbstractVerticle {
                 }
               });
     }
+  }
+
+  private Future<Void> deleteOldSnapshots(final String directory) {
+    log.debug("Deleting old snapshots from {}", directory);
+    final Promise<Void> promise = Promise.promise();
+    vertx
+        .fileSystem()
+        .readDir(
+            directory,
+            readResult -> {
+              if (readResult.succeeded()) {
+                CompositeFuture.all(
+                        readResult.result().stream().map(this::delete).collect(Collectors.toList()))
+                    .onSuccess(success -> promise.complete())
+                    .onFailure(
+                        failure -> {
+                          log.error("Error deleting all files", failure.getCause());
+                          promise.fail(failure.getCause());
+                        });
+              } else {
+                log.error("Error listing files", readResult.cause());
+                promise.fail(readResult.cause());
+              }
+            });
+    return promise.future();
+  }
+
+  private Future<Void> delete(final String fileOrDirectory) {
+    log.debug("Deleting {}", fileOrDirectory);
+    final Promise<Void> promise = Promise.promise();
+    vertx
+        .fileSystem()
+        .deleteRecursive(
+            fileOrDirectory,
+            true,
+            deleteResult -> {
+              if (deleteResult.failed()) {
+                log.error("Unable to delete {}", fileOrDirectory, deleteResult.cause());
+                promise.fail(deleteResult.cause());
+              }
+              promise.complete();
+            });
+    return promise.future();
   }
 
   private void updateSnapshot(
