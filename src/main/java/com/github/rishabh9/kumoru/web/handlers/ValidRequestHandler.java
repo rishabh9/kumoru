@@ -1,4 +1,4 @@
-package com.github.rishabh9.kumoru.handlers;
+package com.github.rishabh9.kumoru.web.handlers;
 
 import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.PUT;
