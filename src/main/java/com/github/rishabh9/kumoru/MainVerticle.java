@@ -10,9 +10,10 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import lombok.extern.log4j.Log4j2;
+
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class MainVerticle extends AbstractVerticle {
@@ -44,8 +45,12 @@ public class MainVerticle extends AbstractVerticle {
   private Future<String> deployWebServer() {
     // Deploy Web server verticle
     final int processors = Runtime.getRuntime().availableProcessors();
-    final DeploymentOptions webServerOptions = new DeploymentOptions();
-    webServerOptions.setInstances(processors * 2);
+    final DeploymentOptions webServerOptions =
+        new DeploymentOptions()
+            .setInstances(processors)
+            .setWorkerPoolName("web-server-pool")
+            .setWorkerPoolSize(processors)
+            .setWorker(true);
     return deploy(WebServer.class.getName(), webServerOptions);
   }
 
@@ -57,10 +62,12 @@ public class MainVerticle extends AbstractVerticle {
   private Future<String> deployArtifactDownloader() {
     // Deploy verticle to help snapshot updates
     final int processors = Runtime.getRuntime().availableProcessors();
-    final DeploymentOptions downloaderOptions = new DeploymentOptions().setInstances(processors);
-    // .setWorkerPoolName("artifact-download-pool")
-    // .setWorkerPoolSize(processors)
-    // .setWorker(true);
+    final DeploymentOptions downloaderOptions =
+        new DeploymentOptions()
+            .setInstances(processors)
+            .setWorkerPoolName("artifact-downloader-pool")
+            .setWorkerPoolSize(processors)
+            .setWorker(true);
     return deploy(ArtifactDownloader.class.getName(), downloaderOptions);
   }
 
