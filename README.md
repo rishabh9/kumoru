@@ -1,18 +1,29 @@
 # Kumoru
 
-image:https://img.shields.io/badge/vert.x-3.9.0-purple.svg[link="https://vertx.io"]
-
-Kumoru is a minimal, lightweight alternative to Sonatype Nexus.
+Kumoru is a minimal, lightweight Maven style artifacts repository manager. I wanted an alternative to Sonatype Nexus,
+and hence, Kumoru.
 
 ## Features
 
-1. Mirrors the following repositories only. The repositories are accessed in the given order.
-    * [x] Maven 2.
-    * [x] JCenter.
-    * [x] Jitpack.
-2. Snapshots repositories of above mirrors are enabled.
-3. Snapshots are checked for updates every 12 hours.
-4. You can 'Publish' artifacts to Kumoru.
+Most of the projects use the following repositories. Hence, only these are proxied by default.
+1. Maven 2.
+2. JCenter.
+3. Jitpack.
+
+A lookup for an artifact is performed in the same order as they are listed above.
+
+Snapshots repositories of above mirrors are also enabled. Hence, snapshots can be proxied too.
+
+An update for a snapshot is checked every 12 hours (since server restart).
+
+You can 'Publish' artifacts to Kumoru. Tested with Gradle's publish plugin. Should work with Maven publish too.
+
+## Caveats
+
+1. To add custom repositories apart from above three, You'll need to update code and rebuild, which, is a very easy task to do.
+2. When latest snapshot is downloaded, older ones are not removed. This may increase space.
+3. There is no way to 'browse' artifacts proxied by the server, from the browser. You'll need to access the Docker volume directly.
+4. There is no authentication of any form. Proxy Kumoru behind a proxy server that provides authentication.
 
 ## Running the server
 
