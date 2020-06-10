@@ -38,10 +38,10 @@ public class SnapshotUpdateChecker extends AbstractVerticle {
     log.debug("Starting snapshot updater");
     webClient = KumoruCommon.createWebClient(vertx);
     vertx.eventBus().registerDefaultCodec(UpdateMessage.class, new UpdateMessageCodec());
-    final int interval = 60;
+    final int interval = 12;
     timerId =
         vertx.setPeriodic(
-            TimeUnit.SECONDS.toMillis(interval),
+            TimeUnit.HOURS.toMillis(interval),
             id -> {
               final ZonedDateTime now = ZonedDateTime.now();
               log.debug("Snapshot update checker started...");
