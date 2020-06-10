@@ -10,10 +10,9 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import lombok.extern.log4j.Log4j2;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class MainVerticle extends AbstractVerticle {
