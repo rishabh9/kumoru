@@ -21,9 +21,8 @@ You can 'Publish' artifacts to Kumoru. Tested with Gradle's publish plugin. Shou
 ## Caveats
 
 1. To add custom repositories apart from above three, You'll need to update code and rebuild, which, is a very easy task to do.
-2. When latest snapshot is downloaded, older ones are not removed. This may increase space.
-3. There is no way to 'browse' artifacts proxied by the server, from the browser. You'll need to access the Docker volume directly.
-4. There is no authentication of any form. Proxy Kumoru behind a proxy server that provides authentication.
+2. There is no way to 'browse' artifacts proxied by the server, from the browser. You'll need to access the Docker volume directly.
+3. There is no authentication of any form. Proxy Kumoru behind a proxy server that provides authentication.
 
 ## Running the server
 
