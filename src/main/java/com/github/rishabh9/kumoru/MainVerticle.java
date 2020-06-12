@@ -1,7 +1,6 @@
 package com.github.rishabh9.kumoru;
 
 import com.github.rishabh9.kumoru.common.KumoruConfig;
-import com.github.rishabh9.kumoru.common.VersionProperties;
 import com.github.rishabh9.kumoru.snapshots.ArtifactDownloader;
 import com.github.rishabh9.kumoru.snapshots.SnapshotUpdateChecker;
 import com.github.rishabh9.kumoru.web.WebServer;
@@ -30,7 +29,7 @@ public class MainVerticle extends AbstractVerticle {
               deploymentIds = success.list();
               log.info(
                   "Kumoru server [v{}] is up and running on port {}",
-                  VersionProperties.INSTANCE.getVersion(),
+                  System.getenv("KUMORU_VERSION"),
                   KumoruConfig.INSTANCE.getKumoruPort());
               startPromise.complete();
             })

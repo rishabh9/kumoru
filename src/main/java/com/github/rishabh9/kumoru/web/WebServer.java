@@ -1,11 +1,11 @@
 package com.github.rishabh9.kumoru.web;
 
 import com.github.rishabh9.kumoru.common.KumoruConfig;
+import com.github.rishabh9.kumoru.common.dto.Repositories;
+import com.github.rishabh9.kumoru.common.dto.Repository;
 import com.github.rishabh9.kumoru.web.handlers.FinalHandler;
-import com.github.rishabh9.kumoru.web.handlers.JCenterMirrorHandler;
-import com.github.rishabh9.kumoru.web.handlers.JitPackMirrorHandler;
 import com.github.rishabh9.kumoru.web.handlers.LocalResourceHandler;
-import com.github.rishabh9.kumoru.web.handlers.MavenMirrorHandler;
+import com.github.rishabh9.kumoru.web.handlers.RepositoryHandler;
 import com.github.rishabh9.kumoru.web.handlers.SendFileHandler;
 import com.github.rishabh9.kumoru.web.handlers.UploadHandler;
 import com.github.rishabh9.kumoru.web.handlers.ValidRequestHandler;
@@ -18,6 +18,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
+import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -30,6 +31,7 @@ public class WebServer extends AbstractVerticle {
 
     // Get configuration
     final int port = KumoruConfig.INSTANCE.getKumoruPort();
+
     final Router router = setupRoutes();
 
     // Logging network server activity
@@ -71,9 +73,6 @@ public class WebServer extends AbstractVerticle {
     // All handlers
     final ValidRequestHandler validRequestHandler = new ValidRequestHandler();
     final LocalResourceHandler localResourceHandler = new LocalResourceHandler(vertx);
-    final MavenMirrorHandler mavenMirror = new MavenMirrorHandler(vertx);
-    final JCenterMirrorHandler jcenterMirror = new JCenterMirrorHandler(vertx);
-    final JitPackMirrorHandler jitPackMirror = new JitPackMirrorHandler(vertx);
     final SendFileHandler sendFileHandler = new SendFileHandler();
     final FinalHandler finalHandler = new FinalHandler();
     final UploadHandler uploadHandler = new UploadHandler(vertx);
@@ -87,14 +86,17 @@ public class WebServer extends AbstractVerticle {
     route.handler(validRequestHandler);
 
     // for GET method do
-    router
-        .get()
-        .handler(localResourceHandler)
-        .handler(mavenMirror)
-        .handler(jcenterMirror)
-        .handler(jitPackMirror)
-        .handler(sendFileHandler)
-        .handler(finalHandler);
+    final Route getRoute = router.get().handler(localResourceHandler);
+    final Repositories repositories = KumoruConfig.INSTANCE.getRepositories();
+    if (null != repositories) {
+      if (null != repositories.getRepositories()) {
+        addRepositoryHandlers(getRoute, repositories.getRepositories(), false);
+      }
+      if (null != repositories.getSnapshotRepositories()) {
+        addRepositoryHandlers(getRoute, repositories.getSnapshotRepositories(), true);
+      }
+    }
+    getRoute.handler(sendFileHandler).handler(finalHandler);
 
     // for PUT method do
     router
@@ -106,5 +108,11 @@ public class WebServer extends AbstractVerticle {
         .handler(uploadHandler);
 
     return router;
+  }
+
+  private void addRepositoryHandlers(
+      final Route route, final Set<Repository> repositories, final boolean snapshot) {
+    repositories.forEach(
+        repository -> route.handler(new RepositoryHandler(vertx, repository, snapshot)));
   }
 }
