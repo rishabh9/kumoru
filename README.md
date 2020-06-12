@@ -83,6 +83,18 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo -v /path/to/custom/repositories.j
 
 > `/path/to/custom/repositories.json` should be replaced with the path where you have placed your custom `repositories.json`.
 
+### Logging
+
+To override the default `log4j2.xml` configuration, you need to provide your own as follows:
+
+```shell script
+docker run -p 8888:8888 -v /tmp/repo:/srv/repo -v /path/to/custom/log4j2.xml:/app/resource/log4j2.xml rishabh9/kumoru
+```
+
+For sample, see the default file under the folder `src/main/resources`.
+
+> `/path/to/custom/log4j2.xml` should be replaced with the path where you have placed your custom `log4j2.xml`.
+
 ## Configuring Maven
 
 1. Mirroring
