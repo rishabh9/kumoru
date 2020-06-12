@@ -2,10 +2,11 @@ package com.github.rishabh9.kumoru.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rishabh9.kumoru.common.dto.Repositories;
-import java.io.IOException;
-import java.io.InputStream;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Log4j2
 public final class KumoruConfig {
@@ -89,7 +90,7 @@ public final class KumoruConfig {
       final InputStream stream = getClass().getResourceAsStream("/repositories.json");
       return mapper.readValue(stream, Repositories.class);
     } catch (IOException e) {
-      log.fatal("Unable to load repositories configuration", e);
+      log.error("Unable to load repositories to proxy. Serving local content only", e);
       return null;
     }
   }
