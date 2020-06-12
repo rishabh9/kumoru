@@ -2,8 +2,6 @@ package com.github.rishabh9.kumoru.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rishabh9.kumoru.common.dto.Repositories;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.Getter;
@@ -17,11 +15,13 @@ public final class KumoruConfig {
   @Getter private final int bodyLimit;
   @Getter private final boolean enableAccessLog;
   @Getter private final int kumoruPort;
+  @Getter private final Repositories repositories;
 
   private KumoruConfig() {
     bodyLimit = getLimit();
     enableAccessLog = isAccessLogEnabled();
     kumoruPort = getPort();
+    repositories = readRepositories();
   }
 
   /**
@@ -83,17 +83,14 @@ public final class KumoruConfig {
    *
    * @return The future for repositories
    */
-  public Future<Repositories> readRepositories() {
-    final Promise<Repositories> promise = Promise.promise();
+  private Repositories readRepositories() {
     try {
       final ObjectMapper mapper = new ObjectMapper();
       final InputStream stream = getClass().getResourceAsStream("/repositories.json");
-      final Repositories repositories = mapper.readValue(stream, Repositories.class);
-      promise.complete(repositories);
+      return mapper.readValue(stream, Repositories.class);
     } catch (IOException e) {
       log.fatal("Unable to load repositories configuration", e);
-      promise.fail(e);
+      return null;
     }
-    return promise.future();
   }
 }

@@ -29,32 +29,26 @@ public class WebServer extends AbstractVerticle {
   @Override
   public void start(final Promise<Void> startFuture) {
 
-    KumoruConfig.INSTANCE
-        .readRepositories()
-        .onFailure(startFuture::fail)
-        .onSuccess(
-            repositories -> {
-              // Get configuration
-              final int port = KumoruConfig.INSTANCE.getKumoruPort();
+    // Get configuration
+    final int port = KumoruConfig.INSTANCE.getKumoruPort();
 
-              final Router router = setupRoutes(repositories);
+    final Router router = setupRoutes();
 
-              // Logging network server activity
-              final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
-              httpServer = vertx.createHttpServer(options);
-              httpServer.requestHandler(router);
-              httpServer.listen(
-                  port,
-                  asyncResult -> {
-                    if (asyncResult.succeeded()) {
-                      log.debug("Web server running on port {}", port);
-                      startFuture.complete();
-                    } else {
-                      log.fatal("Failed to start web server", asyncResult.cause());
-                      startFuture.fail(asyncResult.cause());
-                    }
-                  });
-            });
+    // Logging network server activity
+    final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
+    httpServer = vertx.createHttpServer(options);
+    httpServer.requestHandler(router);
+    httpServer.listen(
+        port,
+        asyncResult -> {
+          if (asyncResult.succeeded()) {
+            log.debug("Web server running on port {}", port);
+            startFuture.complete();
+          } else {
+            log.fatal("Failed to start web server", asyncResult.cause());
+            startFuture.fail(asyncResult.cause());
+          }
+        });
   }
 
   @Override
@@ -74,7 +68,7 @@ public class WebServer extends AbstractVerticle {
     }
   }
 
-  private Router setupRoutes(final Repositories repositories) {
+  private Router setupRoutes() {
 
     // All handlers
     final ValidRequestHandler validRequestHandler = new ValidRequestHandler();
@@ -93,6 +87,7 @@ public class WebServer extends AbstractVerticle {
 
     // for GET method do
     final Route getRoute = router.get().handler(localResourceHandler);
+    final Repositories repositories = KumoruConfig.INSTANCE.getRepositories();
     if (null != repositories) {
       if (null != repositories.getRepositories()) {
         addRepositoryHandlers(getRoute, repositories.getRepositories());
