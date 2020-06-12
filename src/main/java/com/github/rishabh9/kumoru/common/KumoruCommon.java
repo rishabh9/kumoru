@@ -9,10 +9,8 @@ import java.util.List;
 public class KumoruCommon {
   public static final String REPO_ROOT = "/srv/repo";
 
-  public static final String MAVEN_RELEASE_URL = "https://repo.maven.apache.org/maven2";
   public static final String MAVEN_SNAPSHOT_URL =
       "https://oss.sonatype.org/content/repositories/snapshots";
-  public static final String JCENTER_RELEASE_URL = "https://jcenter.bintray.com";
   // Use the following format if you want to specify a custom JCenter user's repository
   // https://dl.bintray.com/<username>/<reponame>
   public static final String JCENTER_SNAPSHOT_URL =

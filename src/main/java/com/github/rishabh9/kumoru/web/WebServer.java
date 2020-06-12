@@ -1,11 +1,11 @@
 package com.github.rishabh9.kumoru.web;
 
 import com.github.rishabh9.kumoru.common.KumoruConfig;
+import com.github.rishabh9.kumoru.common.dto.Repositories;
+import com.github.rishabh9.kumoru.common.dto.Repository;
 import com.github.rishabh9.kumoru.web.handlers.FinalHandler;
-import com.github.rishabh9.kumoru.web.handlers.JCenterMirrorHandler;
-import com.github.rishabh9.kumoru.web.handlers.JitPackMirrorHandler;
 import com.github.rishabh9.kumoru.web.handlers.LocalResourceHandler;
-import com.github.rishabh9.kumoru.web.handlers.MavenMirrorHandler;
+import com.github.rishabh9.kumoru.web.handlers.RepositoryHandler;
 import com.github.rishabh9.kumoru.web.handlers.SendFileHandler;
 import com.github.rishabh9.kumoru.web.handlers.UploadHandler;
 import com.github.rishabh9.kumoru.web.handlers.ValidRequestHandler;
@@ -18,6 +18,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
+import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -28,25 +29,32 @@ public class WebServer extends AbstractVerticle {
   @Override
   public void start(final Promise<Void> startFuture) {
 
-    // Get configuration
-    final int port = KumoruConfig.INSTANCE.getKumoruPort();
-    final Router router = setupRoutes();
+    KumoruConfig.INSTANCE
+        .readRepositories()
+        .onFailure(startFuture::fail)
+        .onSuccess(
+            repositories -> {
+              // Get configuration
+              final int port = KumoruConfig.INSTANCE.getKumoruPort();
 
-    // Logging network server activity
-    final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
-    httpServer = vertx.createHttpServer(options);
-    httpServer.requestHandler(router);
-    httpServer.listen(
-        port,
-        asyncResult -> {
-          if (asyncResult.succeeded()) {
-            log.debug("Web server running on port {}", port);
-            startFuture.complete();
-          } else {
-            log.fatal("Failed to start web server", asyncResult.cause());
-            startFuture.fail(asyncResult.cause());
-          }
-        });
+              final Router router = setupRoutes(repositories);
+
+              // Logging network server activity
+              final HttpServerOptions options = new HttpServerOptions().setLogActivity(true);
+              httpServer = vertx.createHttpServer(options);
+              httpServer.requestHandler(router);
+              httpServer.listen(
+                  port,
+                  asyncResult -> {
+                    if (asyncResult.succeeded()) {
+                      log.debug("Web server running on port {}", port);
+                      startFuture.complete();
+                    } else {
+                      log.fatal("Failed to start web server", asyncResult.cause());
+                      startFuture.fail(asyncResult.cause());
+                    }
+                  });
+            });
   }
 
   @Override
@@ -66,14 +74,11 @@ public class WebServer extends AbstractVerticle {
     }
   }
 
-  private Router setupRoutes() {
+  private Router setupRoutes(final Repositories repositories) {
 
     // All handlers
     final ValidRequestHandler validRequestHandler = new ValidRequestHandler();
     final LocalResourceHandler localResourceHandler = new LocalResourceHandler(vertx);
-    final MavenMirrorHandler mavenMirror = new MavenMirrorHandler(vertx);
-    final JCenterMirrorHandler jcenterMirror = new JCenterMirrorHandler(vertx);
-    final JitPackMirrorHandler jitPackMirror = new JitPackMirrorHandler(vertx);
     final SendFileHandler sendFileHandler = new SendFileHandler();
     final FinalHandler finalHandler = new FinalHandler();
     final UploadHandler uploadHandler = new UploadHandler(vertx);
@@ -87,14 +92,15 @@ public class WebServer extends AbstractVerticle {
     route.handler(validRequestHandler);
 
     // for GET method do
-    router
-        .get()
-        .handler(localResourceHandler)
-        .handler(mavenMirror)
-        .handler(jcenterMirror)
-        .handler(jitPackMirror)
-        .handler(sendFileHandler)
-        .handler(finalHandler);
+    final Route mirrorRoute = router.get().handler(localResourceHandler);
+    addRepositoryHandlers(mirrorRoute, repositories.getRepositories());
+    mirrorRoute.handler(sendFileHandler).handler(finalHandler);
+
+    // for GET method (for SNAPSHOT) do
+    final Route snapshotRoute =
+        router.getWithRegex(".*\\-SNAPSHOT*.").handler(localResourceHandler);
+    addRepositoryHandlers(snapshotRoute, repositories.getSnapshotRepositories());
+    snapshotRoute.handler(sendFileHandler).handler(finalHandler);
 
     // for PUT method do
     router
@@ -106,5 +112,9 @@ public class WebServer extends AbstractVerticle {
         .handler(uploadHandler);
 
     return router;
+  }
+
+  private void addRepositoryHandlers(final Route route, final Set<Repository> repositories) {
+    repositories.forEach(repository -> route.handler(new RepositoryHandler(vertx, repository)));
   }
 }

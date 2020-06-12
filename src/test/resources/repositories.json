@@ -1,0 +1,37 @@
+{
+  "repositories": [
+    {
+      "name": "Maven",
+      "url": "https://repo.maven.apache.org/maven2",
+      "basicAuth": {
+        "username": "",
+        "password": ""
+      },
+      "bearerToken": {
+        "token": ""
+      }
+    },
+    {
+      "name": "JCenter",
+      "url": "https://jcenter.bintray.com"
+    },
+    {
+      "name": "JitPack",
+      "url": "https://jitpack.io"
+    }
+  ],
+  "snapshotRepositories": [
+    {
+      "name": "Maven Snapshot",
+      "url": "https://oss.sonatype.org/content/repositories/snapshots"
+    },
+    {
+      "name": "JCenter Snapshot",
+      "url": "https://oss.jfrog.org/artifactory/oss-snapshot-local"
+    },
+    {
+      "name": "JitPack",
+      "url": "https://jitpack.io"
+    }
+  ]
+}

@@ -1,5 +1,11 @@
 package com.github.rishabh9.kumoru.common;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.rishabh9.kumoru.common.dto.Repositories;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import java.io.IOException;
+import java.io.InputStream;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -70,5 +76,24 @@ public final class KumoruConfig {
       log.debug("Setting default port {}", defaultPort);
       return defaultPort;
     }
+  }
+
+  /**
+   * Reads the repositories to be configured.
+   *
+   * @return The future for repositories
+   */
+  public Future<Repositories> readRepositories() {
+    final Promise<Repositories> promise = Promise.promise();
+    try {
+      final ObjectMapper mapper = new ObjectMapper();
+      final InputStream stream = getClass().getResourceAsStream("/repositories.json");
+      final Repositories repositories = mapper.readValue(stream, Repositories.class);
+      promise.complete(repositories);
+    } catch (IOException e) {
+      log.fatal("Unable to load repositories configuration", e);
+      promise.fail(e);
+    }
+    return promise.future();
   }
 }
