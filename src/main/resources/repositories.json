@@ -1,7 +1,7 @@
 {
   "repositories": [
     {
-      "name": "Maven",
+      "name": "Maven2",
       "url": "https://repo.maven.apache.org/maven2"
     },
     {
@@ -15,15 +15,15 @@
   ],
   "snapshotRepositories": [
     {
-      "name": "Maven Snapshot",
+      "name": "Maven2-Snapshot",
       "url": "https://oss.sonatype.org/content/repositories/snapshots"
     },
     {
-      "name": "JCenter Snapshot",
+      "name": "JCenter-Snapshot",
       "url": "https://oss.jfrog.org/artifactory/oss-snapshot-local"
     },
     {
-      "name": "JitPack Snapshot",
+      "name": "JitPack-Snapshot",
       "url": "https://jitpack.io"
     }
   ]

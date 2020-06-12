@@ -90,10 +90,10 @@ public class WebServer extends AbstractVerticle {
     final Repositories repositories = KumoruConfig.INSTANCE.getRepositories();
     if (null != repositories) {
       if (null != repositories.getRepositories()) {
-        addRepositoryHandlers(getRoute, repositories.getRepositories());
+        addRepositoryHandlers(getRoute, repositories.getRepositories(), false);
       }
       if (null != repositories.getSnapshotRepositories()) {
-        addRepositoryHandlers(getRoute, repositories.getSnapshotRepositories());
+        addRepositoryHandlers(getRoute, repositories.getSnapshotRepositories(), true);
       }
     }
     getRoute.handler(sendFileHandler).handler(finalHandler);
@@ -110,7 +110,9 @@ public class WebServer extends AbstractVerticle {
     return router;
   }
 
-  private void addRepositoryHandlers(final Route route, final Set<Repository> repositories) {
-    repositories.forEach(repository -> route.handler(new RepositoryHandler(vertx, repository)));
+  private void addRepositoryHandlers(
+      final Route route, final Set<Repository> repositories, final boolean snapshot) {
+    repositories.forEach(
+        repository -> route.handler(new RepositoryHandler(vertx, repository, snapshot)));
   }
 }

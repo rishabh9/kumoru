@@ -19,6 +19,7 @@ public class RepositoryHandler extends KumoruHandler {
 
   private final Vertx vertx;
   private final Repository repository;
+  private final boolean snapshot;
 
   /**
    * Constructor.
@@ -26,15 +27,21 @@ public class RepositoryHandler extends KumoruHandler {
    * @param vertx The Vertx object.
    * @param repository The URL of repository.
    */
-  public RepositoryHandler(final Vertx vertx, final Repository repository) {
+  public RepositoryHandler(final Vertx vertx, final Repository repository, final boolean snapshot) {
     this.vertx = vertx;
     this.repository = repository;
+    this.snapshot = snapshot;
   }
 
   @Override
   public void handle(final RoutingContext routingContext) {
     if (resourceFound(routingContext)) {
-      log.debug("Resource has been found, moving onto next handler");
+      log.debug("[{}] Resource has been found, moving onto next handler", repository.getName());
+      routingContext.next();
+    } else if (ignore(routingContext)) {
+      log.debug(
+          "[{}] Snapshots not handled by this handler, moving onto next handler",
+          repository.getName());
       routingContext.next();
     } else {
       final String path = routingContext.normalisedPath();
@@ -57,18 +64,22 @@ public class RepositoryHandler extends KumoruHandler {
             if (asyncWebResult.succeeded()
                 && null != asyncWebResult.result()
                 && null != asyncWebResult.result().body()) {
-              log.debug("Found resource {} on {}", path, repository.getName());
+              log.debug("[{}] Found resource {}", repository.getName(), path);
               saveResource(routingContext, path, asyncWebResult.result().body());
             } else {
               log.debug(
-                  "Not able to retrieve {} from {}",
-                  path,
+                  "[{}] Not able to retrieve {}",
                   repository.getName(),
+                  path,
                   asyncWebResult.cause());
               routingContext.next();
             }
           });
     }
+  }
+
+  private boolean ignore(final RoutingContext routingContext) {
+    return routingContext.normalisedPath().contains("-SNAPSHOT") && !snapshot;
   }
 
   private void saveResource(
