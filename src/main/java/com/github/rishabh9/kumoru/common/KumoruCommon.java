@@ -39,7 +39,7 @@ public class KumoruCommon {
     final WebClientOptions webClientOptions =
         new WebClientOptions()
             .setSsl(true)
-            .setUserAgent("kumoru/" + VersionProperties.INSTANCE.getVersion())
+            .setUserAgent("kumoru/" + System.getenv("KUMORU_VERSION"))
             .setFollowRedirects(true)
             .setMaxRedirects(5);
     return WebClient.create(vertx, webClientOptions);
