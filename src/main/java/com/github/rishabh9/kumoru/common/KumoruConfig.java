@@ -1,5 +1,9 @@
 package com.github.rishabh9.kumoru.common;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.rishabh9.kumoru.common.dto.Repositories;
+import java.io.IOException;
+import java.io.InputStream;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -11,11 +15,13 @@ public final class KumoruConfig {
   @Getter private final int bodyLimit;
   @Getter private final boolean enableAccessLog;
   @Getter private final int kumoruPort;
+  @Getter private final Repositories repositories;
 
   private KumoruConfig() {
     bodyLimit = getLimit();
     enableAccessLog = isAccessLogEnabled();
     kumoruPort = getPort();
+    repositories = readRepositories();
   }
 
   /**
@@ -69,6 +75,22 @@ public final class KumoruConfig {
     } else {
       log.debug("Setting default port {}", defaultPort);
       return defaultPort;
+    }
+  }
+
+  /**
+   * Reads the repositories to be configured.
+   *
+   * @return The future for repositories
+   */
+  private Repositories readRepositories() {
+    try {
+      final ObjectMapper mapper = new ObjectMapper();
+      final InputStream stream = getClass().getResourceAsStream("/repositories.json");
+      return mapper.readValue(stream, Repositories.class);
+    } catch (IOException e) {
+      log.error("Unable to load repositories to proxy. Serving local content only", e);
+      return null;
     }
   }
 }

@@ -20,15 +20,13 @@ You can 'Publish' artifacts to Kumoru. Tested with Gradle's publish plugin. Shou
 
 ## Caveats
 
-1. To add custom repositories apart from above three, You'll need to update code and rebuild, which, is a very easy task to do.
-2. When latest snapshot is downloaded, older ones are not removed. This may increase space.
-3. There is no way to 'browse' artifacts proxied by the server, from the browser. You'll need to access the Docker volume directly.
-4. There is no authentication of any form. Proxy Kumoru behind a proxy server that provides authentication.
+1. There is no way to 'browse' artifacts proxied by the server, from the browser. You'll need to access the Docker volume directly.
+2. There is no authentication of any form. Proxy Kumoru behind a proxy server that provides authentication.
 
 ## Running the server
 
 To run your application:
-```
+```shell script
 docker run -p 8888:8888 -v /tmp/repo:/srv/repo rishabh9/kumoru
 ```
 
@@ -36,16 +34,66 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo rishabh9/kumoru
 > This is the location where the artifacts will be downloaded on the host machine.
 
 To enable access logs, set the environment variable `KUMORU_ACCESS_LOG=true` as:
-```
+```shell script
 docker run -e KUMORU_ACCESS_LOG=true -p 8888:8888 -v /tmp/repo:/srv/repo rishabh9/kumoru
 ```
 
 > All logs are written to the `STDOUT`.
 
 To run the container on a different time zone (default is GMT), set the environment variable `TZ`. Example:
-```
+```shell script
 docker run -p 8888:8888 -v /tmp/repo:/srv/repo -e TZ=Europe/Amsterdam rishabh9/kumoru
 ```
+
+### Specifying repositories
+
+Create a file `repositories.json`. For sample, see the default file under the folder `src/main/resources`.
+Modify it to add/remove repositories you want.
+
+To configure a repository that requires basic authentication, configure as:
+
+```json
+    {
+      "name": "DemoRepoBasicAuth",
+      "url": "http://maven-repo.demo:8080",
+      "basicAuth": {
+        "username": "demo",
+        "password": "demo"
+      }
+    }
+```
+
+To configure a repository that requires bearer token for authentication, configure as:
+
+```json
+    {
+      "name": "DemoRepoBearerToken",
+      "url": "http://maven-repo.demo:8080",
+      "bearerToken": {
+        "token": "demoToken"
+      }
+    }
+```
+
+Use your custom `repositories.json` file as:
+
+```shell script
+docker run -p 8888:8888 -v /tmp/repo:/srv/repo -v /path/to/custom/repositories.json:/app/resource/repositories.json rishabh9/kumoru
+```
+
+> `/path/to/custom/repositories.json` should be replaced with the path where you have placed your custom `repositories.json`.
+
+### Logging
+
+To override the default `log4j2.xml` configuration, you need to provide your own as follows:
+
+```shell script
+docker run -p 8888:8888 -v /tmp/repo:/srv/repo -v /path/to/custom/log4j2.xml:/app/resource/log4j2.xml rishabh9/kumoru
+```
+
+For sample, see the default file under the folder `src/main/resources`.
+
+> `/path/to/custom/log4j2.xml` should be replaced with the path where you have placed your custom `log4j2.xml`.
 
 ## Configuring Maven
 
@@ -53,7 +101,7 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo -e TZ=Europe/Amsterdam rishabh9/k
 
     Edit Maven's `settings.xml` and add a `<mirror>`:
     
-    ```
+    ```xml
       <mirrors>
         <mirror>
           <id>kumoru</id>
@@ -68,7 +116,7 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo -e TZ=Europe/Amsterdam rishabh9/k
 
     In your `pom.xml` add
     
-    ```
+    ```xml
       <distributionManagement>
         <repository>
           <id>kumoru</id>
@@ -84,7 +132,7 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo -e TZ=Europe/Amsterdam rishabh9/k
 
     Add in your `build.gradle`
     
-    ```
+    ```groovy
     repositories {
       maven {
         url: "http://localhost:8888"
@@ -95,7 +143,7 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo -e TZ=Europe/Amsterdam rishabh9/k
 
     Add in your `build.gradle`
     
-    ```
+    ```groovy
     publishing {
       repositories {
         maven {
@@ -115,11 +163,11 @@ docker run -p 8888:8888 -v /tmp/repo:/srv/repo -e TZ=Europe/Amsterdam rishabh9/k
 ### Build
 
 To build Kumoru source:
-```
+```shell script
 ./gradlew clean build
 ```
 
 To package Kumoru as Docker container:
-```
+```shell script
 ./gradlew jibDockerBuild
 ```
