@@ -92,15 +92,16 @@ public class WebServer extends AbstractVerticle {
     route.handler(validRequestHandler);
 
     // for GET method do
-    final Route mirrorRoute = router.get().handler(localResourceHandler);
-    addRepositoryHandlers(mirrorRoute, repositories.getRepositories());
-    mirrorRoute.handler(sendFileHandler).handler(finalHandler);
-
-    // for GET method (for SNAPSHOT) do
-    final Route snapshotRoute =
-        router.getWithRegex(".*\\-SNAPSHOT*.").handler(localResourceHandler);
-    addRepositoryHandlers(snapshotRoute, repositories.getSnapshotRepositories());
-    snapshotRoute.handler(sendFileHandler).handler(finalHandler);
+    final Route getRoute = router.get().handler(localResourceHandler);
+    if (null != repositories) {
+      if (null != repositories.getRepositories()) {
+        addRepositoryHandlers(getRoute, repositories.getRepositories());
+      }
+      if (null != repositories.getSnapshotRepositories()) {
+        addRepositoryHandlers(getRoute, repositories.getSnapshotRepositories());
+      }
+    }
+    getRoute.handler(sendFileHandler).handler(finalHandler);
 
     // for PUT method do
     router

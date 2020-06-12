@@ -57,11 +57,14 @@ public class RepositoryHandler extends KumoruHandler {
             if (asyncWebResult.succeeded()
                 && null != asyncWebResult.result()
                 && null != asyncWebResult.result().body()) {
-              log.debug("Found resource {} on {}", path, repository);
+              log.debug("Found resource {} on {}", path, repository.getName());
               saveResource(routingContext, path, asyncWebResult.result().body());
             } else {
               log.debug(
-                  "Not able to retrieve {} from {}", path, repository, asyncWebResult.cause());
+                  "Not able to retrieve {} from {}",
+                  path,
+                  repository.getName(),
+                  asyncWebResult.cause());
               routingContext.next();
             }
           });

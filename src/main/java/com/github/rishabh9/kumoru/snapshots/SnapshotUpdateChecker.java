@@ -2,9 +2,10 @@ package com.github.rishabh9.kumoru.snapshots;
 
 import static com.github.rishabh9.kumoru.common.KumoruCommon.ARTIFACT_VERTICLE;
 import static com.github.rishabh9.kumoru.common.KumoruCommon.REPO_ROOT;
-import static com.github.rishabh9.kumoru.common.KumoruCommon.SNAPSHOT_URLS;
 
 import com.github.rishabh9.kumoru.common.KumoruCommon;
+import com.github.rishabh9.kumoru.common.KumoruConfig;
+import com.github.rishabh9.kumoru.common.dto.Repository;
 import com.github.rishabh9.kumoru.snapshots.parser.MetadataAsyncXmlParser;
 import com.github.rishabh9.kumoru.snapshots.parser.SnapshotMetadata;
 import io.vertx.core.AbstractVerticle;
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
@@ -35,28 +37,40 @@ public class SnapshotUpdateChecker extends AbstractVerticle {
   private static final String SNAPSHOT = "-SNAPSHOT";
   private static long timerId;
   private static WebClient webClient;
+  private static Set<String> snapshots;
 
   @Override
   public void start(final Promise<Void> startPromise) {
     log.debug("Starting snapshot updater");
-    webClient = KumoruCommon.createWebClient(vertx);
-    vertx.eventBus().registerDefaultCodec(UpdateMessage.class, new UpdateMessageCodec());
-    final int interval = 60;
-    timerId =
-        vertx.setPeriodic(
-            TimeUnit.SECONDS.toMillis(interval),
-            id -> {
-              final ZonedDateTime now = ZonedDateTime.now();
-              log.debug("Snapshot update checker started...");
-              // Start from repository root folder,
-              // and recursively visit each folder.
-              visit(REPO_ROOT);
-              log.debug(
-                  "Next snapshot update check at {}",
-                  now.plus(Duration.ofSeconds(interval)).format(DateTimeFormatter.ISO_DATE_TIME));
+    KumoruConfig.INSTANCE
+        .readRepositories()
+        .onFailure(startPromise::fail)
+        .onSuccess(
+            repositories -> {
+              snapshots =
+                  repositories.getSnapshotRepositories().stream()
+                      .map(Repository::getUrl)
+                      .collect(Collectors.toSet());
+              webClient = KumoruCommon.createWebClient(vertx);
+              vertx.eventBus().registerDefaultCodec(UpdateMessage.class, new UpdateMessageCodec());
+              final int interval = 12;
+              timerId =
+                  vertx.setPeriodic(
+                      TimeUnit.HOURS.toMillis(interval),
+                      id -> {
+                        final ZonedDateTime now = ZonedDateTime.now();
+                        log.debug("Snapshot update checker started...");
+                        // Start from repository root folder,
+                        // and recursively visit each folder.
+                        visit(REPO_ROOT);
+                        log.debug(
+                            "Next snapshot update check at {}",
+                            now.plus(Duration.ofSeconds(interval))
+                                .format(DateTimeFormatter.ISO_DATE_TIME));
+                      });
+              log.debug("Snapshot updater started with timer-id {}", timerId);
+              startPromise.complete();
             });
-    log.debug("Snapshot updater started with timer-id {}", timerId);
-    startPromise.complete();
   }
 
   @Override
@@ -87,7 +101,7 @@ public class SnapshotUpdateChecker extends AbstractVerticle {
                   if (fileOrDirectory.endsWith(SNAPSHOT)) {
                     // Since filename ends with "-SNAPSHOT", it's a directory we need to update
                     log.debug("Found snapshot to update {}", fileOrDirectory);
-                    nextMirror(SNAPSHOT_URLS.iterator(), fileOrDirectory);
+                    nextMirror(snapshots.iterator(), fileOrDirectory);
                   }
                 }
                 log.trace("");
