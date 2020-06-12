@@ -2,11 +2,10 @@ package com.github.rishabh9.kumoru.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rishabh9.kumoru.common.dto.Repositories;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
-
 import java.io.IOException;
 import java.io.InputStream;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class KumoruConfig {
